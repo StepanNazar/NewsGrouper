@@ -1,0 +1,13 @@
+[lint]
+
+extend-select = [
+    "W",        # PyCodeStyle warnings
+    "I",        # Sort imports properly
+    "UP",       # Warn if certain things can changed due to newer Python versions
+    "B",        # bugbear (common bugs, bad practices)
+    "C4",       # Catch incorrect use of comprehensions, dict, list, etc
+    "SIM",      # Common simplification rules
+    "RUF",      # ruff-specific rules
+    "S",        # bandit (basic security checks)
+    "DTZ",      # enforce timezone-aware datetime
+]

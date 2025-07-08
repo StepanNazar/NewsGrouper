@@ -1,0 +1,7 @@
+{
+  "include": ["src"],
+  "exclude": ["venv", "__pycache__"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+  "venv": "venv"
+}
