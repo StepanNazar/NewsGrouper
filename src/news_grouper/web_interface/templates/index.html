@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Grouper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .section h2 {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .profile-info {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sources-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .source-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .source-info {
+            flex: 1;
+        }
+
+        .source-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .source-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .news-content {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .post-group {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-group-summary {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .post-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #764ba2;
+        }
+
+        .post-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .post-author {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .post-body {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .datetime-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .datetime-group .form-group {
+            flex: 1;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-display {
+            background: white;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-display:hover {
+            background: rgba(102, 126, 234, 0.05);
+            border-color: #764ba2;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .datetime-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>News Grouper</h1>
+
+        <!-- Profile Management -->
+        <div class="section">
+            <h2>Profile Management</h2>
+            <div id="current-profile" class="profile-info" style="display: none;">
+                <strong>Current Profile:</strong> <span id="profile-name"></span><br>
+                <span id="profile-description"></span>
+            </div>
+
+            <div class="grid">
+                <div>
+                    <h3>Create New Profile</h3>
+                    <form id="create-profile-form">
+                        <div class="form-group">
+                            <label for="new-profile-name">Name:</label>
+                            <input type="text" id="new-profile-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-profile-description">Description:</label>
+                            <textarea id="new-profile-description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-profile-path">Save File Path:</label>
+                            <input type="text" id="new-profile-path" placeholder="e.g., /path/to/profile.json" required>
+                            <small style="color: #666; font-size: 0.9em;">Enter the full path where you want to save this profile. Browser security prevents using a file save dialog.</small>
+                        </div>
+                        <button type="submit">Create Profile</button>
+                    </form>
+                </div>
+
+                <div>
+                    <h3>Load Existing Profile</h3>
+                    <div class="form-group">
+                        <label>Select Profile File:</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="profile-file" class="file-input" accept=".json">
+                            <div class="file-input-display">
+                                <span id="file-display-text">Click to select profile file</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="load-profile-btn" onclick="loadProfile()">Load Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- News Sources Management -->
+        <div class="section">
+            <h2>News Sources</h2>
+            <div class="grid">
+                <div>
+                    <h3>Add New Source</h3>
+                    <form id="add-source-form">
+                        <div class="form-group">
+                            <label for="source-name">Name:</label>
+                            <input type="text" id="source-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="source-parser">Parser:</label>
+                            <select id="source-parser" required>
+                                <option value="">Select a parser...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="source-link">Link:</label>
+                            <input type="text" id="source-link" required>
+                            <small id="parser-hint" style="color: #666; font-size: 0.9em;"></small>
+                        </div>
+                        <button type="submit">Add Source</button>
+                    </form>
+                </div>
+
+                <div>
+                    <h3>Current Sources</h3>
+                    <div id="sources-list" class="sources-list">
+                        <div class="loading">No profile loaded</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- News Fetching -->
+        <div class="section">
+            <h2>Fetch News</h2>
+            <form id="fetch-news-form">
+                <div class="form-group">
+                    <label for="grouper-select">Grouper:</label>
+                    <select id="grouper-select" required>
+                        <option value="">Select a grouper...</option>
+                    </select>
+                </div>
+                <div class="datetime-group">
+                    <div class="form-group">
+                        <label for="from-datetime">From Date:</label>
+                        <input type="datetime-local" id="from-datetime">
+                    </div>
+                    <div class="form-group">
+                        <label for="to-datetime">To Date:</label>
+                        <input type="datetime-local" id="to-datetime">
+                    </div>
+                </div>
+                <button type="submit">Fetch News</button>
+            </form>
+        </div>
+
+        <!-- News Display -->
+        <div class="section">
+            <h2>News Content</h2>
+            <div id="news-content" class="news-content">
+                <div class="loading">Fetch news to see content here</div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="messages"></div>
+    </div>
+
+    <script>
+        let currentProfile = null;
+        let parsers = [];
+        let groupers = [];
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadParsers();
+            loadGroupers();
+            setupEventListeners();
+            checkCurrentProfile();
+        });
+
+        async function checkCurrentProfile() {
+            try {
+                currentProfile = await apiCall('/current-profile');
+                updateProfileDisplay();
+                loadSources();
+                showMessage('Profile loaded successfully!', 'success');
+            } catch (error) {
+                // No profile is loaded, that's okay
+                console.log('No profile currently loaded');
+            }
+        }
+
+        function setupEventListeners() {
+            // Profile creation
+            document.getElementById('create-profile-form').addEventListener('submit', createProfile);
+
+            // Source management
+            document.getElementById('add-source-form').addEventListener('submit', addSource);
+            document.getElementById('source-parser').addEventListener('change', updateParserHint);
+
+            // News fetching
+            document.getElementById('fetch-news-form').addEventListener('submit', fetchNews);
+
+            // File input
+            document.getElementById('profile-file').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    document.getElementById('file-display-text').textContent = file.name;
+                }
+            });
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`/api${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'API request failed');
+                }
+
+                return await response.json();
+            } catch (error) {
+                showMessage(error.message, 'error');
+                throw error;
+            }
+        }
+
+        function showMessage(message, type = 'error') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        async function loadParsers() {
+            try {
+                const select = document.getElementById('source-parser');
+                select.innerHTML = '<option value="">Loading parsers...</option>';
+
+                parsers = await apiCall('/parsers');
+
+                select.innerHTML = '<option value="">Select a parser...</option>';
+                if (parsers && parsers.length > 0) {
+                    parsers.forEach(parser => {
+                        const option = document.createElement('option');
+                        option.value = parser.name;
+                        option.textContent = `${parser.name} - ${parser.description}`;
+                        select.appendChild(option);
+                    });
+                    showMessage('Parsers loaded successfully', 'success');
+                } else {
+                    select.innerHTML = '<option value="">No parsers available</option>';
+                    showMessage('No parsers available', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to load parsers:', error);
+                document.getElementById('source-parser').innerHTML = '<option value="">Failed to load parsers</option>';
+                showMessage('Failed to load parsers: ' + error.message, 'error');
+            }
+        }
+
+        async function loadGroupers() {
+            try {
+                const select = document.getElementById('grouper-select');
+                select.innerHTML = '<option value="">Loading groupers...</option>';
+
+                groupers = await apiCall('/groupers');
+
+                select.innerHTML = '<option value="">Select a grouper...</option>';
+                if (groupers && groupers.length > 0) {
+                    groupers.forEach(grouper => {
+                        const option = document.createElement('option');
+                        option.value = grouper.name;
+                        option.textContent = `${grouper.name} - ${grouper.description}`;
+                        select.appendChild(option);
+                    });
+                    showMessage('Groupers loaded successfully', 'success');
+                } else {
+                    select.innerHTML = '<option value="">No groupers available</option>';
+                    showMessage('No groupers available', 'error');
+                }
+            } catch (error) {
+                console.error('Failed to load groupers:', error);
+                document.getElementById('grouper-select').innerHTML = '<option value="">Failed to load groupers</option>';
+                showMessage('Failed to load groupers: ' + error.message, 'error');
+            }
+        }
+
+        function updateParserHint() {
+            const selectedParser = document.getElementById('source-parser').value;
+            const hintElement = document.getElementById('parser-hint');
+
+            if (selectedParser) {
+                const parser = parsers.find(p => p.name === selectedParser);
+                if (parser && parser.link_hint) {
+                    hintElement.textContent = `Hint: ${parser.link_hint}`;
+                } else {
+                    hintElement.textContent = '';
+                }
+            } else {
+                hintElement.textContent = '';
+            }
+        }
+
+        async function createProfile(e) {
+            e.preventDefault(); // This prevents the default form submission
+
+            const profileData = {
+                name: document.getElementById('new-profile-name').value,
+                description: document.getElementById('new-profile-description').value,
+                file_path: document.getElementById('new-profile-path').value
+            };
+
+            try {
+                const profile = await apiCall('/profiles', {
+                    method: 'POST',
+                    body: JSON.stringify(profileData)
+                });
+
+                currentProfile = profile;
+                updateProfileDisplay();
+                loadSources();
+                showMessage('Profile created successfully!', 'success');
+                document.getElementById('create-profile-form').reset();
+            } catch (error) {
+                console.error('Failed to create profile:', error);
+                showMessage('Failed to create profile: ' + error.message, 'error');
+            }
+
+            return false; // Ensure no form submission occurs
+        }
+
+        async function loadProfile() {
+            const fileInput = document.getElementById('profile-file');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showMessage('Please select a profile file', 'error');
+                return;
+            }
+
+            try {
+                const profile = await apiCall('/current-profile', {
+                    method: 'POST',
+                    body: JSON.stringify({ profile_path: file.name })
+                });
+
+                currentProfile = profile;
+                updateProfileDisplay();
+                loadSources();
+                showMessage('Profile loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+            }
+        }
+
+        function updateProfileDisplay() {
+            if (currentProfile) {
+                document.getElementById('current-profile').style.display = 'block';
+                document.getElementById('profile-name').textContent = currentProfile.name;
+                document.getElementById('profile-description').textContent = currentProfile.description || '';
+            } else {
+                document.getElementById('current-profile').style.display = 'none';
+            }
+        }
+
+        async function loadSources() {
+            try {
+                const sources = await apiCall('/sources');
+                const sourcesList = document.getElementById('sources-list');
+
+                if (sources.length === 0) {
+                    sourcesList.innerHTML = '<div class="loading">No sources configured</div>';
+                    return;
+                }
+
+                sourcesList.innerHTML = sources.map(source => `
+                    <div class="source-item">
+                        <div class="source-info">
+                            <div class="source-name">${source.name}</div>
+                            <div class="source-details">${source.parser_name} - ${source.link}</div>
+                        </div>
+                        <button onclick="deleteSource(${source.id})" style="background: #e74c3c;">Delete</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('sources-list').innerHTML = '<div class="loading">No profile loaded</div>';
+            }
+        }
+
+        async function addSource(e) {
+            e.preventDefault();
+
+            if (!currentProfile) {
+                showMessage('Please load a profile first', 'error');
+                return;
+            }
+
+            const sourceData = {
+                name: document.getElementById('source-name').value,
+                parser_name: document.getElementById('source-parser').value,
+                link: document.getElementById('source-link').value
+            };
+
+            try {
+                await apiCall('/sources', {
+                    method: 'POST',
+                    body: JSON.stringify(sourceData)
+                });
+
+                loadSources();
+                showMessage('Source added successfully!', 'success');
+                e.target.reset();
+                document.getElementById('parser-hint').textContent = '';
+            } catch (error) {
+                console.error('Failed to add source:', error);
+            }
+        }
+
+        async function deleteSource(sourceId) {
+            if (!confirm('Are you sure you want to delete this source?')) {
+                return;
+            }
+
+            try {
+                await apiCall(`/sources/${sourceId}`, {
+                    method: 'DELETE'
+                });
+
+                loadSources();
+                showMessage('Source deleted successfully!', 'success');
+            } catch (error) {
+                console.error('Failed to delete source:', error);
+            }
+        }
+
+        async function fetchNews(e) {
+            e.preventDefault();
+
+            if (!currentProfile) {
+                showMessage('Please load a profile first', 'error');
+                return;
+            }
+
+            const grouper = document.getElementById('grouper-select').value;
+            const fromDateTime = document.getElementById('from-datetime').value;
+            const toDateTime = document.getElementById('to-datetime').value;
+
+            if (!grouper) {
+                showMessage('Please select a grouper', 'error');
+                return;
+            }
+
+            const newsContent = document.getElementById('news-content');
+            newsContent.innerHTML = '<div class="loading">Fetching news...</div>';
+
+            try {
+                const params = new URLSearchParams({ grouper });
+                if (fromDateTime) params.append('from_datetime', fromDateTime);
+                if (toDateTime) params.append('to_datetime', toDateTime);
+
+                const newsData = await apiCall(`/news?${params}`);
+                displayNews(newsData);
+                showMessage('News fetched successfully!', 'success');
+            } catch (error) {
+                newsContent.innerHTML = '<div class="error">Failed to fetch news</div>';
+                console.error('Failed to fetch news:', error);
+            }
+        }
+
+        function displayNews(newsData) {
+            const newsContent = document.getElementById('news-content');
+
+            if (!newsData.post_groups.length && !newsData.posts.length) {
+                newsContent.innerHTML = '<div class="loading">No news found</div>';
+                return;
+            }
+
+            let html = '';
+
+            // Display post groups
+            if (newsData.post_groups.length > 0) {
+                html += '<h3>Grouped Posts</h3>';
+                newsData.post_groups.forEach((group, groupIndex) => {
+                    // Process summary to add reference links
+                    let processedSummary = group.summary;
+                    // Match patterns like [1] or [1, 2, 3]
+                    processedSummary = processedSummary.replace(/\[(\d+(?:,\s*\d+)*)\]/g, function(match, numbers) {
+                        const refs = numbers.split(',').map(n => n.trim());
+                        return `<a href="#" class="ref-link" data-refs="${refs.join(',')}" data-group="${groupIndex}">${match}</a>`;
+                    });
+
+                    html += `
+                        <div class="post-group">
+                            <div class="post-group-summary"><strong>AI Summary:</strong> ${processedSummary}</div>
+                            ${group.posts.map((post, postIndex) => `
+                                <div class="post-item" id="group-${groupIndex}-post-${postIndex}">
+                                    ${post.title ? `<div class="post-title">${post.title}</div>` : ''}
+                                    ${post.author ? `<div class="post-author">By: ${post.author}</div>` : ''}
+                                    <div class="post-body">${post.body}</div>
+                                    ${post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">Original Source</a></div>` : ''}
+                                    ${post.published_time ? `<div class="post-time">Published: ${post.published_time}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                });
+            }
+
+            // Display individual posts
+            if (newsData.posts.length > 0) {
+                html += '<h3>Individual Posts</h3>';
+                newsData.posts.forEach(post => {
+                    html += `
+                        <div class="post-item">
+                            ${post.title ? `<div class="post-title">${post.title}</div>` : ''}
+                            ${post.author ? `<div class="post-author">By: ${post.author}</div>` : ''}
+                            <div class="post-body">${post.body}</div>
+                            ${post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">Original Source</a></div>` : ''}
+                            ${post.published_time ? `<div class="post-time">Published: ${post.published_time}</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+
+            newsContent.innerHTML = html;
+
+            // Add event listeners for reference links
+            document.querySelectorAll('.ref-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const refs = this.getAttribute('data-refs').split(',');
+                    const groupIndex = this.getAttribute('data-group');
+
+                    refs.forEach(ref => {
+                        const postElement = document.getElementById(`group-${groupIndex}-post-${parseInt(ref) - 1}`);
+                        if (postElement) {
+                            postElement.scrollIntoView({ behavior: 'smooth' });
+                            postElement.style.backgroundColor = '#ffffd0'; // Highlight the post
+                            setTimeout(() => {
+                                postElement.style.backgroundColor = ''; // Remove highlight after a delay
+                            }, 2000);
+                        }
+                    });
+                });
+            });
+        }
+    </script>
+</body>
+</html>

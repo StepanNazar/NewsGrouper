@@ -1,0 +1,8 @@
+fastfeedparser~=0.3.9
+requests~=2.32.4
+beautifulsoup4~=4.13.4
+numpy~=2.3.1
+scikit-learn~=1.7.0
+google-genai~=1.24.0
+python-dotenv~=1.1.1
+apiflask~=2.4.0

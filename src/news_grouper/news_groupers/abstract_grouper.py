@@ -1,0 +1,71 @@
+from abc import ABC, abstractmethod
+
+from news_grouper.models.posts import Post, PostGroup
+
+
+class NewsGrouper(ABC):
+    """Abstract base class for news groupers.
+
+    >>> class RedditGrouper(NewsGrouper):
+    ...     name = "Reddit"
+    ...     description = "Grouper for Reddit posts"
+    ...
+    ...     def group_posts(self, posts: list[Post]) -> list[Post]:
+    ...         pass
+    ...
+    ...     def check_source_link(self, link: str) -> bool:
+    ...         pass
+    ...
+    >>> [[grouper.name, grouper.description] for grouper in NewsGrouper.get_all_groupers()]
+    [['Reddit', 'Grouper for Reddit posts']]
+    >>> NewsGrouper.get_grouper_by_name('Reddit').name
+    'Reddit'
+    >>> NewsGrouper.get_grouper_by_name('NonExistent')
+    Traceback (most recent call last):
+        ...
+    ValueError: Grouper with name 'NonExistent' not found
+    """
+
+    name: str
+    description: str
+
+    def __init_subclass__(cls):
+        for attr in ["name", "description"]:
+            if not hasattr(cls, attr):
+                raise TypeError(f"{cls.__name__} must define class attribute '{attr}'")
+        names = [grouper.name for grouper in cls.__subclasses__()]
+        if cls.name in names:
+            raise ValueError(
+                f"Grouper name '{cls.name}' is not unique among subclasses"
+            )
+
+    @staticmethod
+    @abstractmethod
+    def group_posts(posts: list[Post]) -> list[Post | PostGroup]:
+        """Group posts based on some criteria.
+
+        :param posts: The list of posts to group.
+        :return: A list of grouped posts.
+        """
+        ...
+
+    @classmethod
+    def get_all_groupers(cls) -> list[type["NewsGrouper"]]:
+        """Get all registered news groupers.
+
+        :return: A list of all news grouper classes.
+        """
+        return cls.__subclasses__()
+
+    @classmethod
+    def get_grouper_by_name(cls, name: str) -> type["NewsGrouper"]:
+        """Get a news grouper class by its name.
+
+        :param name: The name of the grouper.
+        :return: The grouper class if found, otherwise None.
+        :raises ValueError: If no grouper with the given name is found.
+        """
+        for grouper in cls.get_all_groupers():
+            if grouper.name.lower() == name.lower():
+                return grouper
+        raise ValueError(f"Grouper with name '{name}' not found")

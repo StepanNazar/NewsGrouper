@@ -57,6 +57,18 @@ repos:
     hooks:
        - id: pyright
          name: "🐍 python · Check types"
+         additional_dependencies:
+           - apiflask
+           - flask
+           - numpy
+           - python-dotenv
+           - requests
+           - beautifulsoup4
+           - fastfeedparser
+           - google-generativeai
+           - scikit-learn
+           - marshmallow
+           - google-genai
 
 #  - repo: https://github.com/abravalheri/validate-pyproject
 #    rev: v0.23
