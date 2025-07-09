@@ -65,7 +65,6 @@ repos:
            - requests
            - beautifulsoup4
            - fastfeedparser
-           - google-generativeai
            - scikit-learn
            - marshmallow
            - google-genai
