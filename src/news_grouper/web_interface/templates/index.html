@@ -11,6 +11,10 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth !important;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -19,6 +23,17 @@
             min-height: 100vh;
             padding: 0;
             margin: 0;
+            scroll-behavior: smooth !important;
+        }
+
+        /* Add smooth scrolling to all scrollable elements */
+        * {
+            scroll-behavior: smooth !important;
+        }
+
+        /* Ensure smooth scrolling works on all browsers */
+        html, body, .sidebar, .main-content, .container, .news-content {
+            scroll-behavior: smooth !important;
         }
 
         .sidebar {
@@ -36,6 +51,7 @@
             box-shadow: 2px 0 16px rgba(102, 126, 234, 0.15);
             z-index: 100;
             overflow-y: auto;
+            scroll-behavior: smooth;
         }
 
         .sidebar h1 {
@@ -91,6 +107,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            scroll-behavior: smooth;
         }
 
         .container {
@@ -102,6 +119,7 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             backdrop-filter: blur(10px);
             margin: 20px 0;
+            scroll-behavior: smooth;
         }
 
         .section-divider {
@@ -402,6 +420,7 @@
             border: none;
             max-height: none;
             overflow: visible;
+            scroll-behavior: smooth;
         }
 
         .post-group {
@@ -1026,7 +1045,13 @@
                     throw new Error(error.message || 'API request failed');
                 }
 
-                return await response.json();
+                // Handle empty responses (common for DELETE operations)
+                const text = await response.text();
+                if (!text) {
+                    return {}; // Return empty object for successful empty responses
+                }
+
+                return JSON.parse(text);
             } catch (error) {
                 showMessage(error.message, 'error');
                 throw error;
@@ -1289,7 +1314,9 @@
 
                 loadSources();
                 showMessage('Source added successfully!', 'success');
-                e.target.reset();
+                // Clear only name and link fields, preserve parser selection
+                document.getElementById('source-name').value = '';
+                document.getElementById('source-link').value = '';
                 document.getElementById('parser-hint').textContent = '';
             } catch (error) {
                 console.error('Failed to add source:', error);
@@ -1310,6 +1337,8 @@
                 showMessage('Source deleted successfully!', 'success');
             } catch (error) {
                 console.error('Failed to delete source:', error);
+                // Still refresh the sources list in case the deletion actually worked
+                loadSources();
             }
         }
 
@@ -1343,8 +1372,8 @@
                     const tzOffset = -date.getTimezoneOffset();
                     const tzOffsetHours = Math.floor(Math.abs(tzOffset) / 60);
                     const tzOffsetMinutes = Math.abs(tzOffset) % 60;
-                    const tzOffsetStr = (tzOffset >= 0 ? '+' : '-') + 
-                                       String(tzOffsetHours).padStart(2, '0') + ':' + 
+                    const tzOffsetStr = (tzOffset >= 0 ? '+' : '-') +
+                                       String(tzOffsetHours).padStart(2, '0') + ':' +
                                        String(tzOffsetMinutes).padStart(2, '0');
                     // Return ISO string with timezone offset
                     return dateTimeStr + tzOffsetStr;
@@ -1366,6 +1395,7 @@
                 newsPagination.page = 1;
                 displayNewsPaginated();
                 showMessage('News fetched successfully!', 'success');
+                // Don't reset the form - preserve all selections
             } catch (error) {
                 newsContent.innerHTML = '<div class="error">Failed to fetch news</div>';
                 console.error('Failed to fetch news:', error);
@@ -1432,7 +1462,7 @@
                     let processedSummary = item.data.summary;
                     processedSummary = processedSummary.replace(/\[(\d+(?:,\s*\d+)*)\]/g, function(match, numbers) {
                         const refs = numbers.split(',').map(n => n.trim());
-                        return `<a href="#" class="ref-link" data-refs="${refs.join(',')}" data-group="${item.groupIndex}">${match}</a>`;
+                        return refs.map(ref => `<a href="#" class="ref-link" data-ref="${ref}" data-group="${item.groupIndex}">[${ref}]</a>`).join('');
                     });
 
                     html += `
@@ -1498,25 +1528,76 @@
             document.querySelectorAll('.ref-link').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const refs = this.getAttribute('data-refs').split(',');
+                    const ref = this.getAttribute('data-ref');
                     const groupIndex = this.getAttribute('data-group');
 
-                    refs.forEach(ref => {
-                        const postElement = document.getElementById(`group-${groupIndex}-post-${parseInt(ref) - 1}`);
-                        if (postElement) {
-                            postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            postElement.style.backgroundColor = '#fff3cd';
-                            postElement.style.borderColor = '#ffc107';
-                            postElement.style.boxShadow = '0 0 20px rgba(255, 193, 7, 0.3)';
-                            setTimeout(() => {
-                                postElement.style.backgroundColor = '';
-                                postElement.style.borderColor = '#e2e8f0';
-                                postElement.style.boxShadow = '';
-                            }, 3000);
-                        }
-                    });
+                    const postElement = document.getElementById(`group-${groupIndex}-post-${parseInt(ref) - 1}`);
+                    if (postElement) {
+                        // Use enhanced smooth scrolling
+                        smoothScrollTo(postElement, { behavior: 'smooth', block: 'center' });
+
+                        // Add highlight effect
+                        postElement.style.backgroundColor = '#fff3cd';
+                        postElement.style.borderColor = '#ffc107';
+                        postElement.style.boxShadow = '0 0 20px rgba(255, 193, 7, 0.3)';
+                        postElement.style.transition = 'all 0.3s ease';
+
+                        setTimeout(() => {
+                            postElement.style.backgroundColor = '';
+                            postElement.style.borderColor = '#e2e8f0';
+                            postElement.style.boxShadow = '';
+                        }, 3000);
+                    }
                 });
             });
+        }
+
+        // Enhanced smooth scrolling function with fallbacks
+        function smoothScrollTo(element, options = {}) {
+            const defaultOptions = {
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'nearest'
+            };
+
+            const scrollOptions = { ...defaultOptions, ...options };
+
+            try {
+                // Try modern smooth scrolling first
+                element.scrollIntoView(scrollOptions);
+            } catch (error) {
+                // Fallback for older browsers
+                try {
+                    element.scrollIntoView(true);
+
+                    // Manual smooth scroll animation as fallback
+                    const targetY = element.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2);
+                    const startY = window.pageYOffset;
+                    const distance = targetY - startY;
+                    const duration = 800;
+                    let startTime = null;
+
+                    function animate(currentTime) {
+                        if (startTime === null) startTime = currentTime;
+                        const timeElapsed = currentTime - startTime;
+                        const progress = Math.min(timeElapsed / duration, 1);
+
+                        // Ease-in-out function
+                        const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+
+                        window.scrollTo(0, startY + distance * ease);
+
+                        if (timeElapsed < duration) {
+                            requestAnimationFrame(animate);
+                        }
+                    }
+
+                    requestAnimationFrame(animate);
+                } catch (fallbackError) {
+                    // Final fallback - just scroll to element
+                    element.scrollIntoView();
+                }
+            }
         }
 
         // Add missing pagination functions
@@ -1532,8 +1613,9 @@
 
             displayNewsPaginated();
 
-            // Scroll to top of news content
-            document.getElementById('news-content').scrollIntoView({ behavior: 'smooth' });
+            // Use enhanced smooth scrolling for pagination
+            const newsContentElement = document.getElementById('news-content');
+            smoothScrollTo(newsContentElement, { behavior: 'smooth', block: 'start' });
         }
 
         // Text expansion functionality
@@ -1547,9 +1629,9 @@
             } else {
                 bodyElement.classList.add('collapsed');
                 button.innerHTML = 'Show more ▼';
-                // Scroll to the element after collapsing
+                // Use enhanced smooth scrolling after collapsing
                 setTimeout(() => {
-                    bodyElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    smoothScrollTo(bodyElement, { behavior: 'smooth', block: 'center' });
                 }, 100);
             }
         }
