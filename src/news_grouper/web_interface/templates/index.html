@@ -26,6 +26,7 @@
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
+            position: relative;
         }
 
         h1 {
@@ -103,20 +104,45 @@
             transform: none;
         }
 
+        #messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .error, .success {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease-out;
+            opacity: 0.95;
+        }
+
         .error {
             color: #e74c3c;
-            background: rgba(231, 76, 60, 0.1);
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
+            background: white;
+            border-left: 4px solid #e74c3c;
         }
 
         .success {
             color: #27ae60;
-            background: rgba(39, 174, 96, 0.1);
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
+            background: white;
+            border-left: 4px solid #27ae60;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 0.95;
+            }
         }
 
         .profile-info {
@@ -271,6 +297,7 @@
     </style>
 </head>
 <body>
+    <div id="messages"></div>
     <div class="container">
         <h1>News Grouper</h1>
 
@@ -385,9 +412,6 @@
                 <div class="loading">Fetch news to see content here</div>
             </div>
         </div>
-
-        <!-- Messages -->
-        <div id="messages"></div>
     </div>
 
     <script>
@@ -477,11 +501,38 @@
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = type;
-            messageDiv.textContent = message;
+
+            // Create message text element
+            const messageText = document.createElement('span');
+            messageText.textContent = message;
+
+            // Create close button
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '&times;';
+            closeButton.style.background = 'none';
+            closeButton.style.border = 'none';
+            closeButton.style.color = 'inherit';
+            closeButton.style.float = 'right';
+            closeButton.style.fontSize = '16px';
+            closeButton.style.cursor = 'pointer';
+            closeButton.style.padding = '0 5px';
+            closeButton.style.marginLeft = '10px';
+            closeButton.onclick = function() {
+                messageDiv.remove();
+            };
+
+            // Append elements to message div
+            messageDiv.appendChild(messageText);
+            messageDiv.appendChild(closeButton);
+
+            // Add to messages container
             messagesDiv.appendChild(messageDiv);
 
+            // Auto-remove after 5 seconds
             setTimeout(() => {
-                messageDiv.remove();
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
             }, 5000);
         }
 
@@ -500,7 +551,6 @@
                         option.textContent = `${parser.name} - ${parser.description}`;
                         select.appendChild(option);
                     });
-                    showMessage('Parsers loaded successfully', 'success');
                 } else {
                     select.innerHTML = '<option value="">No parsers available</option>';
                     showMessage('No parsers available', 'error');
@@ -527,7 +577,6 @@
                         option.textContent = `${grouper.name} - ${grouper.description}`;
                         select.appendChild(option);
                     });
-                    showMessage('Groupers loaded successfully', 'success');
                 } else {
                     select.innerHTML = '<option value="">No groupers available</option>';
                     showMessage('No groupers available', 'error');
