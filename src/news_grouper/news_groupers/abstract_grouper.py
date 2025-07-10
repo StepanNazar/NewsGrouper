@@ -55,7 +55,15 @@ class NewsGrouper(ABC):
 
         :return: A list of all news grouper classes.
         """
-        return cls.__subclasses__()
+
+        def collect_subclasses(base_class):
+            result = []
+            for subclass in base_class.__subclasses__():
+                result.append(subclass)
+                result.extend(collect_subclasses(subclass))
+            return result
+
+        return collect_subclasses(cls)
 
     @classmethod
     def get_grouper_by_name(cls, name: str) -> type["NewsGrouper"]:

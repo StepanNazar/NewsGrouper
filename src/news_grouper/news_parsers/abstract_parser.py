@@ -68,7 +68,15 @@ class NewsParser(ABC):
     @classmethod
     def get_all_parsers(cls) -> list[type["NewsParser"]]:
         """Get all registered parsers."""
-        return cls.__subclasses__()
+
+        def collect_subclasses(base_class):
+            result = []
+            for subclass in base_class.__subclasses__():
+                result.append(subclass)
+                result.extend(collect_subclasses(subclass))
+            return result
+
+        return collect_subclasses(cls)
 
     @classmethod
     def get_parser_by_name(cls, name: str) -> type["NewsParser"]:
