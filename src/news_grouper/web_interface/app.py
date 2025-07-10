@@ -168,11 +168,8 @@ def get_news(query_data):
 
 
 if __name__ == "__main__":
-    import socket
+    import webview
 
-    # find free private port
-    sock = socket.socket()
-    sock.bind(("", 0))
-    port = sock.getsockname()[1]
-    sock.close()
-    app.run(debug=True, port=port)
+    # create_window url parameter also accepts wsgi app but typing is not documented
+    webview.create_window("News Grouper", app, maximized=True)  # type: ignore
+    webview.start()
