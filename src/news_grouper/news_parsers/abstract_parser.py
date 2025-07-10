@@ -41,10 +41,10 @@ class NewsParser(ABC):
         if cls.name in names:
             raise ValueError(f"Parser name '{cls.name}' is not unique among subclasses")
 
-    @staticmethod
+    @classmethod
     @abstractmethod
     def get_posts(
-        link: str, from_datetime: datetime, to_datetime: datetime | None
+        cls, link: str, from_datetime: datetime, to_datetime: datetime | None
     ) -> list[Post]:
         """Get posts from the source within the specified date range.
 
@@ -55,9 +55,9 @@ class NewsParser(ABC):
         """
         ...
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def check_source_link(link: str) -> bool:
+    def check_source_link(cls, link: str) -> bool:
         """Check if the source link is valid.
 
         :param link: The link to check.

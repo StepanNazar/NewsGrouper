@@ -1,15 +1,12 @@
-import logging
 from datetime import datetime
 
-import fastfeedparser
-import requests
 from bs4 import BeautifulSoup
 
 from news_grouper.models.posts import Post
-from news_grouper.news_parsers.abstract_parser import NewsParser
+from news_grouper.news_parsers import RSSFeedParser
 
 
-class TelegramRSSBridgeParser(NewsParser):
+class TelegramRSSBridgeParser(RSSFeedParser):
     """
     Parse for Telegram using rss-bridge.org
     """
@@ -18,8 +15,9 @@ class TelegramRSSBridgeParser(NewsParser):
     description = "Parses public Telegram channels using rss-bridge.org. Only last messages are available. Messages with quotes are not available on rss-bridge.org"
     link_hint = "@channel_name or https://t.me/channel_name"
 
-    @staticmethod
+    @classmethod
     def get_posts(
+        cls,
         link: str,
         from_datetime: datetime,
         to_datetime: datetime | None = None,
@@ -31,46 +29,17 @@ class TelegramRSSBridgeParser(NewsParser):
         :param from_datetime: The start date and time for fetching posts.
         :param to_datetime: The end date and time for fetching posts. If None, fetch posts till the current time.
         """
-        link = TelegramRSSBridgeParser.convert_link(link)
-        feed = fastfeedparser.parse(link)
-        posts = []
-        for entry in feed["entries"]:
-            body = ""
-            try:
-                body = TelegramRSSBridgeParser.extract_text(
-                    entry["content"][0]["value"]
-                )
-            except Exception as e:
-                logging.exception("Error extracting text from entry: %s", e)
-            if not body:
-                continue
-            published_time = datetime.fromisoformat(entry["published"])
-            if published_time < from_datetime:
-                continue
-            if to_datetime and published_time > to_datetime:
-                continue
-            post = Post(
-                title=entry["title"],
-                body=body,
-                published_time=published_time,
-                author=entry["author"],
-                link=entry["links"][0]["href"],
-            )
-            posts.append(post)
-        return posts
+        link = cls.convert_link(link)
+        return super().get_posts(link, from_datetime, to_datetime)
 
-    @staticmethod
-    def check_source_link(link: str) -> bool:
+    @classmethod
+    def check_source_link(cls, link: str) -> bool:
         """Check if the source link is valid."""
-        link = TelegramRSSBridgeParser.convert_link(link)
-        try:
-            response = requests.get(link, timeout=10)
-            return response.status_code == 200
-        except requests.RequestException:
-            return False
+        link = cls.convert_link(link)
+        return super().check_source_link(link)
 
-    @staticmethod
-    def convert_link(link: str) -> str:
+    @classmethod
+    def convert_link(cls, link: str) -> str:
         """Convert a Telegram link to the rss-bridge.org format.
 
         >>> TelegramRSSBridgeParser.convert_link("@channel_name")
@@ -87,8 +56,8 @@ class TelegramRSSBridgeParser(NewsParser):
 
         return f"https://rss-bridge.org/bridge01/?action=display&bridge=TelegramBridge&username={link}&format=Atom"
 
-    @staticmethod
-    def extract_text(content):
+    @classmethod
+    def extract_text(cls, content):
         soup = BeautifulSoup(content, features="lxml")
         for br in soup.find_all("br"):
             br.replace_with(soup.new_string("\n"))
