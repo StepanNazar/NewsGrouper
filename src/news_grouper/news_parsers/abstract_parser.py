@@ -44,13 +44,13 @@ class NewsParser(ABC):
     @staticmethod
     @abstractmethod
     def get_posts(
-        link: str, from_datetime: datetime | None, to_datetime: datetime | None
+        link: str, from_datetime: datetime, to_datetime: datetime | None
     ) -> list[Post]:
         """Get posts from the source within the specified date range.
 
         :param link: The link to the source from which to fetch posts.
-        :param from_datetime: The start date and time for fetching posts. If None, all posts are fetched.
-        :param to_datetime: The end date and time for fetching posts. If None, all posts are fetched.
+        :param from_datetime: The start date and time for fetching posts.
+        :param to_datetime: The end date and time for fetching posts. If None, fetch posts till the current time.
         :return: A list of posts.
         """
         ...

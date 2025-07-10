@@ -21,15 +21,15 @@ class TelegramRSSBridgeParser(NewsParser):
     @staticmethod
     def get_posts(
         link: str,
-        from_datetime: datetime | None = None,
+        from_datetime: datetime,
         to_datetime: datetime | None = None,
     ) -> list[Post]:
         """
         Get posts from a Telegram channel using rss-bridge.org.
 
         :param link: The link to the Telegram channel.
-        :param from_datetime: The start date and time for fetching posts. If None, all posts are fetched.
-        :param to_datetime: The end date and time for fetching posts. If None, all posts are fetched.
+        :param from_datetime: The start date and time for fetching posts.
+        :param to_datetime: The end date and time for fetching posts. If None, fetch posts till the current time.
         """
         link = TelegramRSSBridgeParser.convert_link(link)
         feed = fastfeedparser.parse(link)
@@ -45,7 +45,7 @@ class TelegramRSSBridgeParser(NewsParser):
             if not body:
                 continue
             published_time = datetime.fromisoformat(entry["published"])
-            if from_datetime and published_time < from_datetime:
+            if published_time < from_datetime:
                 continue
             if to_datetime and published_time > to_datetime:
                 continue

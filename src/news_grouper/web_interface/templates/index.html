@@ -367,7 +367,7 @@
                 <div class="datetime-group">
                     <div class="form-group">
                         <label for="from-datetime">From Date:</label>
-                        <input type="datetime-local" id="from-datetime">
+                        <input type="datetime-local" id="from-datetime" required>
                     </div>
                     <div class="form-group">
                         <label for="to-datetime">To Date:</label>
@@ -692,9 +692,25 @@
             newsContent.innerHTML = '<div class="loading">Fetching news...</div>';
 
             try {
+                // Add timezone offset to datetime values
+                const addTimezoneOffset = (dateTimeStr) => {
+                    if (!dateTimeStr) return '';
+                    // Create a Date object from the datetime-local value
+                    const date = new Date(dateTimeStr);
+                    // Get timezone offset in minutes and convert to hours:minutes format
+                    const tzOffset = -date.getTimezoneOffset();
+                    const tzOffsetHours = Math.floor(Math.abs(tzOffset) / 60);
+                    const tzOffsetMinutes = Math.abs(tzOffset) % 60;
+                    const tzOffsetStr = (tzOffset >= 0 ? '+' : '-') + 
+                                       String(tzOffsetHours).padStart(2, '0') + ':' + 
+                                       String(tzOffsetMinutes).padStart(2, '0');
+                    // Return ISO string with timezone offset
+                    return dateTimeStr + tzOffsetStr;
+                };
+
                 const params = new URLSearchParams({ grouper });
-                if (fromDateTime) params.append('from_datetime', fromDateTime);
-                if (toDateTime) params.append('to_datetime', toDateTime);
+                if (fromDateTime) params.append('from_datetime', addTimezoneOffset(fromDateTime));
+                if (toDateTime) params.append('to_datetime', addTimezoneOffset(toDateTime));
 
                 const newsData = await apiCall(`/news?${params}`);
                 displayNews(newsData);

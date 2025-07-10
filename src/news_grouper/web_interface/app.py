@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from apiflask import APIFlask, abort
 from flask import render_template
@@ -141,8 +142,12 @@ def get_news(query_data):
         abort(400, message="No news sources configured for current profile")
 
     all_posts = []
-    from_datetime = query_data.get("from_datetime")
-    to_datetime = query_data.get("to_datetime")
+    from_datetime = datetime.fromisoformat(query_data.get("from_datetime"))
+    to_datetime = (
+        datetime.fromisoformat(query_data.get("to_datetime"))
+        if query_data.get("to_datetime")
+        else None
+    )
     for source in current_profile.news_sources:
         posts = source.parser.get_posts(source.link, from_datetime, to_datetime)
         all_posts.extend(posts)

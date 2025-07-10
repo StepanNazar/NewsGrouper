@@ -38,7 +38,7 @@ class SwitchProfileSchema(Schema):
 
 class NewsInSchema(Schema):
     grouper = String(required=True)
-    from_datetime = String()
+    from_datetime = String(required=True)
     to_datetime = String()
 
 
