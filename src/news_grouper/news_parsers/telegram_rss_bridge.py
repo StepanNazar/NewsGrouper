@@ -90,6 +90,8 @@ class TelegramRSSBridgeParser(NewsParser):
     @staticmethod
     def extract_text(content):
         soup = BeautifulSoup(content, features="lxml")
+        for br in soup.find_all("br"):
+            br.replace_with(soup.new_string("\n"))
         tags = soup.css.select(".tgme_widget_message_text, blockquote")
         return "\n".join(tag.get_text().strip() for tag in tags)
 
