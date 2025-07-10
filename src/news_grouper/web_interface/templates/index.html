@@ -395,6 +395,22 @@
         let parsers = [];
         let groupers = [];
 
+        // Function to convert server time to local timezone
+        function formatLocalTime(timeString) {
+            if (!timeString) return '';
+
+            // Parse the server-provided time string
+            const date = new Date(timeString);
+
+            // Check if the date is valid
+            if (isNaN(date.getTime())) {
+                return timeString; // Return original string if parsing fails
+            }
+
+            // Format the date in the client's local timezone
+            return date.toLocaleString();
+        }
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
             loadParsers();
@@ -752,7 +768,7 @@
                                     ${post.author ? `<div class="post-author">By: ${post.author}</div>` : ''}
                                     <div class="post-body">${post.body}</div>
                                     ${post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">Original Source</a></div>` : ''}
-                                    ${post.published_time ? `<div class="post-time">Published: ${post.published_time}</div>` : ''}
+                                    ${post.published_time ? `<div class="post-time">Published: ${formatLocalTime(post.published_time)}</div>` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -770,7 +786,7 @@
                             ${post.author ? `<div class="post-author">By: ${post.author}</div>` : ''}
                             <div class="post-body">${post.body}</div>
                             ${post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">Original Source</a></div>` : ''}
-                            ${post.published_time ? `<div class="post-time">Published: ${post.published_time}</div>` : ''}
+                            ${post.published_time ? `<div class="post-time">Published: ${formatLocalTime(post.published_time)}</div>` : ''}
                         </div>
                     `;
                 });
