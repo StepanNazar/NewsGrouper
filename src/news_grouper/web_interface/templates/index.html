@@ -419,6 +419,13 @@
         let parsers = [];
         let groupers = [];
 
+        // Pagination state for unified list
+        let newsPagination = {
+            combined: [],
+            page: 1,
+            perPage: 5
+        };
+
         // Function to convert server time to local timezone
         function formatLocalTime(timeString) {
             if (!timeString) return '';
@@ -778,7 +785,16 @@
                 if (toDateTime) params.append('to_datetime', addTimezoneOffset(toDateTime));
 
                 const newsData = await apiCall(`/news?${params}`);
-                displayNews(newsData);
+                // Combine post groups and posts into a single list
+                newsPagination.combined = [];
+                (newsData.post_groups || []).forEach((group, idx) => {
+                    newsPagination.combined.push({ type: 'group', data: group, groupIndex: idx });
+                });
+                (newsData.posts || []).forEach(post => {
+                    newsPagination.combined.push({ type: 'post', data: post });
+                });
+                newsPagination.page = 1;
+                displayNewsPaginated();
                 showMessage('News fetched successfully!', 'success');
             } catch (error) {
                 newsContent.innerHTML = '<div class="error">Failed to fetch news</div>';
@@ -786,33 +802,43 @@
             }
         }
 
-        function displayNews(newsData) {
+        function displayNewsPaginated() {
             const newsContent = document.getElementById('news-content');
+            const { combined, page, perPage } = newsPagination;
 
-            if (!newsData.post_groups.length && !newsData.posts.length) {
+            if (!combined.length) {
                 newsContent.innerHTML = '<div class="loading">No news found</div>';
                 return;
             }
 
             let html = '';
+            const totalPages = Math.ceil(combined.length / perPage);
+            const start = (page - 1) * perPage;
+            const end = start + perPage;
+            const itemsToShow = combined.slice(start, end);
 
-            // Display post groups
-            if (newsData.post_groups.length > 0) {
-                html += '<h3>Grouped Posts</h3>';
-                newsData.post_groups.forEach((group, groupIndex) => {
-                    // Process summary to add reference links
-                    let processedSummary = group.summary;
-                    // Match patterns like [1] or [1, 2, 3]
+            // Pagination controls (top)
+            if (totalPages > 1) {
+                html += `<div style="text-align:center;margin:10px 0;">
+                    <button onclick="changeNewsPage(-1)" ${page === 1 ? 'disabled' : ''}>&laquo; Prev</button>
+                    <span style="margin:0 10px;">Page ${page} of ${totalPages}</span>
+                    <button onclick="changeNewsPage(1)" ${page === totalPages ? 'disabled' : ''}>Next &raquo;</button>
+                </div>`;
+            }
+
+            itemsToShow.forEach((item, idx) => {
+                if (item.type === 'group') {
+                    let processedSummary = item.data.summary;
                     processedSummary = processedSummary.replace(/\[(\d+(?:,\s*\d+)*)\]/g, function(match, numbers) {
                         const refs = numbers.split(',').map(n => n.trim());
-                        return `<a href="#" class="ref-link" data-refs="${refs.join(',')}" data-group="${groupIndex}">${match}</a>`;
+                        return `<a href="#" class="ref-link" data-refs="${refs.join(',')}" data-group="${item.groupIndex}">${match}</a>`;
                     });
 
                     html += `
                         <div class="post-group">
                             <div class="post-group-summary"><strong>AI Summary:</strong> ${processedSummary}</div>
-                            ${group.posts.map((post, postIndex) => `
-                                <div class="post-item" id="group-${groupIndex}-post-${postIndex}">
+                            ${item.data.posts.map((post, postIndex) => `
+                                <div class="post-item" id="group-${item.groupIndex}-post-${postIndex}">
                                     ${post.title ? `<div class="post-title">${post.title}</div>` : ''}
                                     ${post.author ? `<div class="post-author">By: ${post.author}</div>` : ''}
                                     <div class="post-body">${post.body}</div>
@@ -822,13 +848,8 @@
                             `).join('')}
                         </div>
                     `;
-                });
-            }
-
-            // Display individual posts
-            if (newsData.posts.length > 0) {
-                html += '<h3>Individual Posts</h3>';
-                newsData.posts.forEach(post => {
+                } else if (item.type === 'post') {
+                    const post = item.data;
                     html += `
                         <div class="post-item">
                             ${post.title ? `<div class="post-title">${post.title}</div>` : ''}
@@ -838,7 +859,16 @@
                             ${post.published_time ? `<div class="post-time">Published: ${formatLocalTime(post.published_time)}</div>` : ''}
                         </div>
                     `;
-                });
+                }
+            });
+
+            // Pagination controls (bottom)
+            if (totalPages > 1) {
+                html += `<div style="text-align:center;margin:10px 0;">
+                    <button onclick="changeNewsPage(-1)" ${page === 1 ? 'disabled' : ''}>&laquo; Prev</button>
+                    <span style="margin:0 10px;">Page ${page} of ${totalPages}</span>
+                    <button onclick="changeNewsPage(1)" ${page === totalPages ? 'disabled' : ''}>Next &raquo;</button>
+                </div>`;
             }
 
             newsContent.innerHTML = html;
@@ -854,14 +884,21 @@
                         const postElement = document.getElementById(`group-${groupIndex}-post-${parseInt(ref) - 1}`);
                         if (postElement) {
                             postElement.scrollIntoView({ behavior: 'smooth' });
-                            postElement.style.backgroundColor = '#ffffd0'; // Highlight the post
+                            postElement.style.backgroundColor = '#ffffd0';
                             setTimeout(() => {
-                                postElement.style.backgroundColor = ''; // Remove highlight after a delay
+                                postElement.style.backgroundColor = '';
                             }, 2000);
                         }
                     });
                 });
             });
+        }
+
+        // Pagination navigation for unified list
+        function changeNewsPage(delta) {
+            const totalPages = Math.ceil(newsPagination.combined.length / newsPagination.perPage);
+            newsPagination.page = Math.min(Math.max(1, newsPagination.page + delta), totalPages);
+            displayNewsPaginated();
         }
     </script>
 </body>
