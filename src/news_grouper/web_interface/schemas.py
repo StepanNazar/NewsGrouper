@@ -1,5 +1,5 @@
 from apiflask import Schema
-from marshmallow.fields import Integer, List, Nested, String
+from apiflask.fields import Integer, List, Nested, String
 
 
 class ParserOutSchema(Schema):
