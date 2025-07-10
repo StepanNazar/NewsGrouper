@@ -14,94 +14,120 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: row;
             min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 30px 24px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-shadow: 2px 0 16px rgba(102, 126, 234, 0.15);
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar h1 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #fff;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar nav a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1em;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: block;
+        }
+
+        .sidebar nav a.active,
+        .sidebar nav a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar .profile-info {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            margin-top: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            flex: 1;
             padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin-left: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .container {
             max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             backdrop-filter: blur(10px);
+            margin: 20px 0;
+        }
+
+        .section-divider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 20px 32px;
+            margin: 48px 0 32px 0;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1.2em;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
             position: relative;
         }
 
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .section {
-            margin-bottom: 30px;
-            padding: 20px;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .section h2 {
-            color: #555;
-            margin-bottom: 15px;
-            font-size: 1.4em;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #666;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        button {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            margin-right: 10px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 18px;
+            z-index: -1;
+            opacity: 0.3;
         }
 
         #messages {
@@ -109,141 +135,172 @@
             top: 20px;
             right: 20px;
             z-index: 1000;
-            max-width: 300px;
-            width: 100%;
+            max-width: 400px;
         }
 
-        .error, .success {
-            padding: 15px;
+        #messages .error,
+        #messages .success {
+            padding: 16px 20px;
+            margin-bottom: 12px;
             border-radius: 8px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            animation: slideIn 0.3s ease-out;
-            opacity: 0.95;
-        }
-
-        .error {
-            color: #e74c3c;
-            background: white;
-            border-left: 4px solid #e74c3c;
-        }
-
-        .success {
-            color: #27ae60;
-            background: white;
-            border-left: 4px solid #27ae60;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 0.95;
-            }
-        }
-
-        .profile-info {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .sources-list {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .source-item {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: between;
             align-items: center;
+            justify-content: space-between;
         }
 
-        .source-info {
-            flex: 1;
+        #messages .error {
+            background: #fee;
+            color: #c53030;
+            border: 1px solid #feb2b2;
         }
 
-        .source-name {
-            font-weight: 600;
-            color: #333;
+        #messages .success {
+            background: #f0fff4;
+            color: #38a169;
+            border: 1px solid #9ae6b4;
         }
 
-        .source-details {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .news-content {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 20px;
+        .section {
+            margin-bottom: 32px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            overflow: hidden;
+            display: none;
         }
 
-        .post-group {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
+        .section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            background: rgba(102, 126, 234, 0.05);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .section-header h2 {
+            color: #2d3748;
+            font-size: 1.25em;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .section-content {
+            padding: 24px;
+        }
+
+        .fetch-news-section {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .fetch-news-section h3 {
+            color: #2d3748;
             margin-bottom: 20px;
-            border-left: 4px solid #667eea;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .post-group-summary {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
             font-size: 1.1em;
-        }
-
-        .post-item {
-            background: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border-left: 3px solid #764ba2;
-        }
-
-        .post-title {
             font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
         }
 
-        .post-author {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 5px;
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
         }
 
-        .post-body {
-            color: #555;
-            line-height: 1.5;
+        .form-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(102, 126, 234, 0.1);
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
+        .form-section h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: all 0.2s ease;
+            background: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group small {
+            color: #718096;
+            font-size: 0.85em;
+            margin-top: 4px;
+            display: block;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .datetime-group {
             display: flex;
-            gap: 15px;
+            gap: 16px;
         }
 
         .datetime-group .form-group {
@@ -252,7 +309,7 @@
 
         .file-input-wrapper {
             position: relative;
-            display: inline-block;
+            display: block;
             width: 100%;
         }
 
@@ -265,151 +322,596 @@
         }
 
         .file-input-display {
-            background: white;
-            border: 2px dashed #667eea;
+            background: #f8f9fa;
+            border: 2px dashed #cbd5e0;
             border-radius: 8px;
-            padding: 20px;
+            padding: 24px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            color: #4a5568;
         }
 
         .file-input-display:hover {
             background: rgba(102, 126, 234, 0.05);
-            border-color: #764ba2;
+            border-color: #667eea;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .sources-list {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .source-item {
+            background: #f8f9fa;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .source-item:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e0;
+        }
+
+        .source-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .source-info {
+            flex: 1;
+        }
+
+        .source-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .source-details {
+            color: #718096;
+            font-size: 0.9em;
+        }
+
+        .source-item button {
+            background: #e53e3e;
+            padding: 8px 16px;
+            font-size: 0.85em;
+            margin-left: 12px;
+        }
+
+        .source-item button:hover {
+            background: #c53030;
+        }
+
+        .news-content {
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            border: none;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .post-group {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 32px;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-group:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .post-group::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .post-group-summary {
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 24px;
+            font-size: 1.1em;
+            line-height: 1.7;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .post-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .post-item:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .post-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .post-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 12px;
+            font-size: 1.15em;
+            line-height: 1.4;
+        }
+
+        .post-author {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .post-body {
+            color: #4a5568;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            font-size: 0.95em;
+            white-space: pre-wrap;
+        }
+
+        .post-body.collapsed {
+            max-height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .post-body.collapsed::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, #f8f9fa);
+        }
+
+        .expand-toggle {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .expand-toggle:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .post-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .post-link a:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+            text-decoration: none;
+        }
+
+        .post-time {
+            color: #a0aec0;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .individual-post {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .individual-post:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .individual-post .post-title {
+            font-size: 1.25em;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        .individual-post .post-body {
+            font-size: 1em;
+            line-height: 1.7;
+            color: #4a5568;
+        }
+
+        .pagination {
+            text-align: center;
+            margin: 48px 0;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .pagination button {
+            margin: 0 12px;
+            padding: 12px 24px;
+            font-size: 0.95em;
+            border-radius: 8px;
+        }
+
+        .pagination span {
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+            font-size: 1.1em;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .stats-item {
+            text-align: center;
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+
+        .stats-item .number {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #667eea;
+            display: block;
+        }
+
+        .ref-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: inline;
+            margin: 0 1px;
+            font-size: 0.95em;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .ref-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+            text-decoration: none;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .algorithm-description {
+            margin-top: 8px;
+            padding: 12px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 6px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            color: #4a5568;
+            font-size: 0.9em;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .algorithm-description.visible {
+            display: block;
+        }
+
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 240px;
+                padding: 20px 16px;
+            }
+
+            .container {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .main-content {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 20px;
+            }
         }
 
         @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px;
+            }
+
+            .sidebar h1 {
+                font-size: 1.5em;
+                margin-bottom: 0;
+            }
+
+            .sidebar nav {
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .sidebar nav a {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            .sidebar .profile-info {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 8px;
+                align-items: stretch;
+            }
+
+            .container {
+                padding: 20px;
+                margin: 0;
+            }
+
+            .section-divider {
+                margin: 20px -20px 16px -20px;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .section-content {
+                padding: 16px;
+            }
+
+            .form-section {
+                padding: 16px;
             }
 
             .datetime-group {
                 flex-direction: column;
+                gap: 12px;
+            }
+
+            #messages {
+                position: static;
+                margin-bottom: 16px;
+                max-width: none;
             }
         }
     </style>
 </head>
 <body>
-    <div id="messages"></div>
-    <div class="container">
+    <div class="sidebar">
         <h1>News Grouper</h1>
+        <nav>
+            <a href="#" data-tab="profile-section" class="active">Profile</a>
+            <a href="#" data-tab="sources-section">Sources</a>
+            <a href="#" data-tab="news-section">Fetch News</a>
+        </nav>
+        <div id="current-profile" class="profile-info" style="display: none;">
+            <strong>Current Profile:</strong> <span id="profile-name"></span><br>
+            <span id="profile-description"></span>
+        </div>
+    </div>
 
-        <!-- Profile Management -->
-        <div class="section">
-            <h2>Profile Management</h2>
-            <div id="current-profile" class="profile-info" style="display: none;">
-                <strong>Current Profile:</strong> <span id="profile-name"></span><br>
-                <span id="profile-description"></span>
+    <div class="main-content">
+        <div id="messages"></div>
+
+        <div class="container">
+            <!-- Profile Management -->
+            <div class="section active" id="profile-section">
+                <div class="section-header">
+                    <h2>Profile Management</h2>
+                </div>
+                <div class="section-content">
+                    <div class="grid">
+                        <div class="form-section">
+                            <h3>Create New Profile</h3>
+                            <form id="create-profile-form">
+                                <div class="form-group">
+                                    <label for="new-profile-name">Name:</label>
+                                    <input type="text" id="new-profile-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-profile-description">Description:</label>
+                                    <textarea id="new-profile-description" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new-profile-path">Save File Path:</label>
+                                    <input type="text" id="new-profile-path" placeholder="e.g., /path/to/profile.json" required>
+                                    <small>Enter the full path where you want to save this profile. Browser security prevents using a file save dialog.</small>
+                                </div>
+                                <button type="submit">Create Profile</button>
+                            </form>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Load Existing Profile</h3>
+                            <form onsubmit="loadProfile();return false;">
+                                <div class="form-group">
+                                    <label>Select Profile File:</label>
+                                    <div class="file-input-wrapper">
+                                        <input type="file" id="profile-file" class="file-input" accept=".json">
+                                        <div class="file-input-display">
+                                            <span id="file-display-text">Click to select profile file</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button id="load-profile-btn" type="submit">Load Profile</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="grid">
-                <div>
-                    <h3>Create New Profile</h3>
-                    <form id="create-profile-form">
-                        <div class="form-group">
-                            <label for="new-profile-name">Name:</label>
-                            <input type="text" id="new-profile-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="new-profile-description">Description:</label>
-                            <textarea id="new-profile-description" rows="3"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="new-profile-path">Save File Path:</label>
-                            <input type="text" id="new-profile-path" placeholder="e.g., /path/to/profile.json" required>
-                            <small style="color: #666; font-size: 0.9em;">Enter the full path where you want to save this profile. Browser security prevents using a file save dialog.</small>
-                        </div>
-                        <button type="submit">Create Profile</button>
-                    </form>
+            <!-- News Sources Management -->
+            <div class="section" id="sources-section">
+                <div class="section-header">
+                    <h2>News Sources</h2>
                 </div>
+                <div class="section-content">
+                    <div class="grid">
+                        <div class="form-section">
+                            <h3>Add New Source</h3>
+                            <form id="add-source-form">
+                                <div class="form-group">
+                                    <label for="source-name">Name:</label>
+                                    <input type="text" id="source-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="source-parser">Parser:</label>
+                                    <select id="source-parser" required>
+                                        <option value="">Select a parser...</option>
+                                    </select>
+                                    <div id="parser-description" class="algorithm-description"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="source-link">Link:</label>
+                                    <input type="text" id="source-link" required>
+                                    <small id="parser-hint"></small>
+                                </div>
+                                <button type="submit">Add Source</button>
+                            </form>
+                        </div>
 
-                <div>
-                    <h3>Load Existing Profile</h3>
-                    <div class="form-group">
-                        <label>Select Profile File:</label>
-                        <div class="file-input-wrapper">
-                            <input type="file" id="profile-file" class="file-input" accept=".json">
-                            <div class="file-input-display">
-                                <span id="file-display-text">Click to select profile file</span>
+                        <div>
+                            <h3 style="margin-bottom: 16px; color: #2d3748; font-size: 1.1em; font-weight: 600;">Current Sources</h3>
+                            <div id="sources-list" class="sources-list">
+                                <div class="loading">No profile loaded</div>
                             </div>
                         </div>
                     </div>
-                    <button id="load-profile-btn" onclick="loadProfile()">Load Profile</button>
                 </div>
             </div>
-        </div>
 
-        <!-- News Sources Management -->
-        <div class="section">
-            <h2>News Sources</h2>
-            <div class="grid">
-                <div>
-                    <h3>Add New Source</h3>
-                    <form id="add-source-form">
-                        <div class="form-group">
-                            <label for="source-name">Name:</label>
-                            <input type="text" id="source-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="source-parser">Parser:</label>
-                            <select id="source-parser" required>
-                                <option value="">Select a parser...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="source-link">Link:</label>
-                            <input type="text" id="source-link" required>
-                            <small id="parser-hint" style="color: #666; font-size: 0.9em;"></small>
-                        </div>
-                        <button type="submit">Add Source</button>
-                    </form>
+            <!-- News Fetching & Display Combined -->
+            <div class="section" id="news-section">
+                <div class="section-header">
+                    <h2>Fetch News</h2>
                 </div>
+                <div class="section-content">
+                    <!-- Fetch News Form -->
+                    <div class="fetch-news-section">
+                        <h3>Fetch News</h3>
+                        <form id="fetch-news-form">
+                            <div class="form-group">
+                                <label for="grouper-select">Grouper:</label>
+                                <select id="grouper-select" required>
+                                    <option value="">Select a grouper...</option>
+                                </select>
+                                <div id="grouper-description" class="algorithm-description"></div>
+                            </div>
+                            <div class="datetime-group">
+                                <div class="form-group">
+                                    <label for="from-datetime">From Date:</label>
+                                    <input type="datetime-local" id="from-datetime" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="to-datetime">To Date:</label>
+                                    <input type="datetime-local" id="to-datetime">
+                                </div>
+                            </div>
+                            <button type="submit">Fetch News</button>
+                        </form>
+                    </div>
 
-                <div>
-                    <h3>Current Sources</h3>
-                    <div id="sources-list" class="sources-list">
-                        <div class="loading">No profile loaded</div>
+                    <!-- News Display -->
+                    <div>
+                        <h3 style="margin-bottom: 16px; color: #2d3748; font-size: 1.1em; font-weight: 600;">News Content</h3>
+                        <div id="news-content" class="news-content">
+                            <div class="loading">Fetch news to see content here</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- News Fetching -->
-        <div class="section">
-            <h2>Fetch News</h2>
-            <form id="fetch-news-form">
-                <div class="form-group">
-                    <label for="grouper-select">Grouper:</label>
-                    <select id="grouper-select" required>
-                        <option value="">Select a grouper...</option>
-                    </select>
-                </div>
-                <div class="datetime-group">
-                    <div class="form-group">
-                        <label for="from-datetime">From Date:</label>
-                        <input type="datetime-local" id="from-datetime" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="to-datetime">To Date:</label>
-                        <input type="datetime-local" id="to-datetime">
-                    </div>
-                </div>
-                <button type="submit">Fetch News</button>
-            </form>
-        </div>
-
-        <!-- News Display -->
-        <div class="section">
-            <h2>News Content</h2>
-            <div id="news-content" class="news-content">
-                <div class="loading">Fetch news to see content here</div>
             </div>
         </div>
     </div>
@@ -442,6 +944,23 @@
             return date.toLocaleString();
         }
 
+        // Tab switching functionality
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(tabId).classList.add('active');
+
+            // Update active nav link
+            document.querySelectorAll('.sidebar nav a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        }
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
             loadParsers();
@@ -463,15 +982,25 @@
         }
 
         function setupEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.sidebar nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+
             // Profile creation
             document.getElementById('create-profile-form').addEventListener('submit', createProfile);
 
             // Source management
             document.getElementById('add-source-form').addEventListener('submit', addSource);
-            document.getElementById('source-parser').addEventListener('change', updateParserHint);
+            document.getElementById('source-parser').addEventListener('change', updateParserInfo);
 
             // News fetching
             document.getElementById('fetch-news-form').addEventListener('submit', fetchNews);
+            document.getElementById('grouper-select').addEventListener('change', updateGrouperInfo);
 
             // File input
             document.getElementById('profile-file').addEventListener('change', function(e) {
@@ -555,9 +1084,13 @@
                     parsers.forEach(parser => {
                         const option = document.createElement('option');
                         option.value = parser.name;
-                        option.textContent = `${parser.name} - ${parser.description}`;
+                        option.textContent = parser.name;
                         select.appendChild(option);
                     });
+
+                    // Select first parser by default
+                    select.value = parsers[0].name;
+                    updateParserInfo();
                 } else {
                     select.innerHTML = '<option value="">No parsers available</option>';
                     showMessage('No parsers available', 'error');
@@ -581,9 +1114,13 @@
                     groupers.forEach(grouper => {
                         const option = document.createElement('option');
                         option.value = grouper.name;
-                        option.textContent = `${grouper.name} - ${grouper.description}`;
+                        option.textContent = grouper.name;
                         select.appendChild(option);
                     });
+
+                    // Select first grouper by default
+                    select.value = groupers[0].name;
+                    updateGrouperInfo();
                 } else {
                     select.innerHTML = '<option value="">No groupers available</option>';
                     showMessage('No groupers available', 'error');
@@ -595,19 +1132,52 @@
             }
         }
 
-        function updateParserHint() {
+        function updateParserInfo() {
             const selectedParser = document.getElementById('source-parser').value;
+            const descriptionElement = document.getElementById('parser-description');
             const hintElement = document.getElementById('parser-hint');
 
             if (selectedParser) {
                 const parser = parsers.find(p => p.name === selectedParser);
-                if (parser && parser.link_hint) {
-                    hintElement.textContent = `Hint: ${parser.link_hint}`;
+                if (parser) {
+                    // Show description
+                    if (parser.description) {
+                        descriptionElement.textContent = parser.description;
+                        descriptionElement.classList.add('visible');
+                    } else {
+                        descriptionElement.classList.remove('visible');
+                    }
+
+                    // Show hint
+                    if (parser.link_hint) {
+                        hintElement.textContent = `Hint: ${parser.link_hint}`;
+                    } else {
+                        hintElement.textContent = '';
+                    }
                 } else {
+                    descriptionElement.classList.remove('visible');
                     hintElement.textContent = '';
                 }
             } else {
+                descriptionElement.classList.remove('visible');
                 hintElement.textContent = '';
+            }
+        }
+
+        function updateGrouperInfo() {
+            const selectedGrouper = document.getElementById('grouper-select').value;
+            const descriptionElement = document.getElementById('grouper-description');
+
+            if (selectedGrouper) {
+                const grouper = groupers.find(g => g.name === selectedGrouper);
+                if (grouper && grouper.description) {
+                    descriptionElement.textContent = grouper.description;
+                    descriptionElement.classList.add('visible');
+                } else {
+                    descriptionElement.classList.remove('visible');
+                }
+            } else {
+                descriptionElement.classList.remove('visible');
             }
         }
 
@@ -802,6 +1372,7 @@
             }
         }
 
+        // Enhanced pagination display
         function displayNewsPaginated() {
             const newsContent = document.getElementById('news-content');
             const { combined, page, perPage } = newsPagination;
@@ -817,17 +1388,47 @@
             const end = start + perPage;
             const itemsToShow = combined.slice(start, end);
 
+            // Separate post groups and individual posts
+            const postGroups = itemsToShow.filter(item => item.type === 'group');
+            const individualPosts = itemsToShow.filter(item => item.type === 'post');
+
+            // Calculate total articles (articles within groups + individual articles)
+            const totalArticlesInGroups = combined.filter(item => item.type === 'group')
+                .reduce((sum, item) => sum + item.data.posts.length, 0);
+            const totalIndividualArticles = combined.filter(item => item.type === 'post').length;
+            const totalArticles = totalArticlesInGroups + totalIndividualArticles;
+
+            // Add stats bar
+            html += `
+                <div class="stats-bar">
+                    <div class="stats-item">
+                        <span class="number">${combined.filter(item => item.type === 'group').length}</span>
+                        <span>Article Groups</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="number">${totalIndividualArticles}</span>
+                        <span>Individual Articles</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="number">${totalArticles}</span>
+                        <span>Total Articles</span>
+                    </div>
+                </div>
+            `;
+
             // Pagination controls (top)
             if (totalPages > 1) {
-                html += `<div style="text-align:center;margin:10px 0;">
-                    <button onclick="changeNewsPage(-1)" ${page === 1 ? 'disabled' : ''}>&laquo; Prev</button>
-                    <span style="margin:0 10px;">Page ${page} of ${totalPages}</span>
+                html += `<div class="pagination">
+                    <button onclick="changeNewsPage(-1)" ${page === 1 ? 'disabled' : ''}>&laquo; Previous</button>
+                    <span>Page ${page} of ${totalPages}</span>
                     <button onclick="changeNewsPage(1)" ${page === totalPages ? 'disabled' : ''}>Next &raquo;</button>
                 </div>`;
             }
 
-            itemsToShow.forEach((item, idx) => {
-                if (item.type === 'group') {
+            // Post Groups Section
+            if (postGroups.length > 0) {
+                html += '<div class="section-divider">📚 Grouped Articles with AI Summaries</div>';
+                postGroups.forEach((item) => {
                     let processedSummary = item.data.summary;
                     processedSummary = processedSummary.replace(/\[(\d+(?:,\s*\d+)*)\]/g, function(match, numbers) {
                         const refs = numbers.split(',').map(n => n.trim());
@@ -836,37 +1437,57 @@
 
                     html += `
                         <div class="post-group">
-                            <div class="post-group-summary"><strong>AI Summary:</strong> ${processedSummary}</div>
-                            ${item.data.posts.map((post, postIndex) => `
-                                <div class="post-item" id="group-${item.groupIndex}-post-${postIndex}">
-                                    ${post.title ? `<div class="post-title">${post.title}</div>` : ''}
-                                    ${post.author ? `<div class="post-author">By: ${post.author}</div>` : ''}
-                                    <div class="post-body">${post.body}</div>
-                                    ${post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">Original Source</a></div>` : ''}
-                                    ${post.published_time ? `<div class="post-time">Published: ${formatLocalTime(post.published_time)}</div>` : ''}
-                                </div>
-                            `).join('')}
+                            <div class="post-group-summary"><strong>🤖 AI Summary:</strong> ${processedSummary}</div>
+                            ${item.data.posts.map((post, postIndex) => {
+                                const bodyId = `group-${item.groupIndex}-post-${postIndex}-body`;
+                                const isLongText = post.body.length > 300;
+
+                                return `
+                                    <div class="post-item" id="group-${item.groupIndex}-post-${postIndex}">
+                                        ${post.title ? `<div class="post-title">${post.title}</div>` : ''}
+                                        ${post.author ? `<div class="post-author">👤 ${post.author}</div>` : ''}
+                                        <div class="post-body ${isLongText ? 'collapsed' : ''}" id="${bodyId}">${post.body}</div>
+                                        ${isLongText ? `<button class="expand-toggle" onclick="toggleExpand('${bodyId}', this)">Show more ▼</button>` : ''}
+                                        <div class="post-meta">
+                                            ${post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">🔗 Read Original</a></div>` : '<div></div>'}
+                                            ${post.published_time ? `<div class="post-time">📅 ${formatLocalTime(post.published_time)}</div>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
                     `;
-                } else if (item.type === 'post') {
+                });
+            }
+
+            // Individual Posts Section
+            if (individualPosts.length > 0) {
+                html += '<div class="section-divider">📰 Individual Articles</div>';
+                individualPosts.forEach((item, index) => {
                     const post = item.data;
+                    const bodyId = `individual-post-${index}-body`;
+                    const isLongText = post.body.length > 300;
+
                     html += `
-                        <div class="post-item">
+                        <div class="individual-post">
                             ${post.title ? `<div class="post-title">${post.title}</div>` : ''}
-                            ${post.author ? `<div class="post-author">By: ${post.author}</div>` : ''}
-                            <div class="post-body">${post.body}</div>
-                            ${post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">Original Source</a></div>` : ''}
-                            ${post.published_time ? `<div class="post-time">Published: ${formatLocalTime(post.published_time)}</div>` : ''}
+                            ${post.author ? `<div class="post-author">👤 ${post.author}</div>` : ''}
+                            <div class="post-body ${isLongText ? 'collapsed' : ''}" id="${bodyId}">${post.body}</div>
+                            ${isLongText ? `<button class="expand-toggle" onclick="toggleExpand('${bodyId}', this)">Show more ▼</button>` : ''}
+                            <div class="post-meta">
+                                ${post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">🔗 Read Original</a></div>` : '<div></div>'}
+                                ${post.published_time ? `<div class="post-time">📅 ${formatLocalTime(post.published_time)}</div>` : ''}
+                            </div>
                         </div>
                     `;
-                }
-            });
+                });
+            }
 
             // Pagination controls (bottom)
             if (totalPages > 1) {
-                html += `<div style="text-align:center;margin:10px 0;">
-                    <button onclick="changeNewsPage(-1)" ${page === 1 ? 'disabled' : ''}>&laquo; Prev</button>
-                    <span style="margin:0 10px;">Page ${page} of ${totalPages}</span>
+                html += `<div class="pagination">
+                    <button onclick="changeNewsPage(-1)" ${page === 1 ? 'disabled' : ''}>&laquo; Previous</button>
+                    <span>Page ${page} of ${totalPages}</span>
                     <button onclick="changeNewsPage(1)" ${page === totalPages ? 'disabled' : ''}>Next &raquo;</button>
                 </div>`;
             }
@@ -883,22 +1504,54 @@
                     refs.forEach(ref => {
                         const postElement = document.getElementById(`group-${groupIndex}-post-${parseInt(ref) - 1}`);
                         if (postElement) {
-                            postElement.scrollIntoView({ behavior: 'smooth' });
-                            postElement.style.backgroundColor = '#ffffd0';
+                            postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            postElement.style.backgroundColor = '#fff3cd';
+                            postElement.style.borderColor = '#ffc107';
+                            postElement.style.boxShadow = '0 0 20px rgba(255, 193, 7, 0.3)';
                             setTimeout(() => {
                                 postElement.style.backgroundColor = '';
-                            }, 2000);
+                                postElement.style.borderColor = '#e2e8f0';
+                                postElement.style.boxShadow = '';
+                            }, 3000);
                         }
                     });
                 });
             });
         }
 
-        // Pagination navigation for unified list
-        function changeNewsPage(delta) {
-            const totalPages = Math.ceil(newsPagination.combined.length / newsPagination.perPage);
-            newsPagination.page = Math.min(Math.max(1, newsPagination.page + delta), totalPages);
+        // Add missing pagination functions
+        function changeNewsPage(direction) {
+            const { combined, page, perPage } = newsPagination;
+            const totalPages = Math.ceil(combined.length / perPage);
+
+            if (direction === 1 && page < totalPages) {
+                newsPagination.page += 1;
+            } else if (direction === -1 && page > 1) {
+                newsPagination.page -= 1;
+            }
+
             displayNewsPaginated();
+
+            // Scroll to top of news content
+            document.getElementById('news-content').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Text expansion functionality
+        function toggleExpand(bodyId, button) {
+            const bodyElement = document.getElementById(bodyId);
+            const isCollapsed = bodyElement.classList.contains('collapsed');
+
+            if (isCollapsed) {
+                bodyElement.classList.remove('collapsed');
+                button.innerHTML = 'Show less ▲';
+            } else {
+                bodyElement.classList.add('collapsed');
+                button.innerHTML = 'Show more ▼';
+                // Scroll to the element after collapsing
+                setTimeout(() => {
+                    bodyElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
         }
     </script>
 </body>
