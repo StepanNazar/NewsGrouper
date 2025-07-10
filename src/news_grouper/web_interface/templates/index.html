@@ -11,10 +11,7 @@
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth !important;
-        }
-
+        /* Remove all scroll-behavior CSS - we'll handle this in JavaScript */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -23,17 +20,13 @@
             min-height: 100vh;
             padding: 0;
             margin: 0;
-            scroll-behavior: smooth !important;
         }
 
-        /* Add smooth scrolling to all scrollable elements */
-        * {
-            scroll-behavior: smooth !important;
-        }
-
-        /* Ensure smooth scrolling works on all browsers */
-        html, body, .sidebar, .main-content, .container, .news-content {
-            scroll-behavior: smooth !important;
+        /* Enhanced smooth scrolling for WebKit browsers */
+        @supports (-webkit-overflow-scrolling: touch) {
+            .sidebar, .main-content, .container, .news-content, .sources-list {
+                -webkit-overflow-scrolling: touch;
+            }
         }
 
         .sidebar {
@@ -51,7 +44,6 @@
             box-shadow: 2px 0 16px rgba(102, 126, 234, 0.15);
             z-index: 100;
             overflow-y: auto;
-            scroll-behavior: smooth;
         }
 
         .sidebar h1 {
@@ -107,7 +99,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            scroll-behavior: smooth;
         }
 
         .container {
@@ -119,7 +110,6 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             backdrop-filter: blur(10px);
             margin: 20px 0;
-            scroll-behavior: smooth;
         }
 
         .section-divider {
@@ -420,7 +410,6 @@
             border: none;
             max-height: none;
             overflow: visible;
-            scroll-behavior: smooth;
         }
 
         .post-group {
@@ -1524,7 +1513,7 @@
 
             newsContent.innerHTML = html;
 
-            // Add event listeners for reference links
+            // Add enhanced event listeners for reference links
             document.querySelectorAll('.ref-link').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -1533,74 +1522,99 @@
 
                     const postElement = document.getElementById(`group-${groupIndex}-post-${parseInt(ref) - 1}`);
                     if (postElement) {
-                        // Use enhanced smooth scrolling
-                        smoothScrollTo(postElement, { behavior: 'smooth', block: 'center' });
+                        // Enhanced smooth scrolling with highlight
+                        smoothScrollTo(postElement, {
+                            block: 'center',
+                            duration: 1200,
+                            easing: 'easeInOutCubic'
+                        });
 
-                        // Add highlight effect
-                        postElement.style.backgroundColor = '#fff3cd';
-                        postElement.style.borderColor = '#ffc107';
-                        postElement.style.boxShadow = '0 0 20px rgba(255, 193, 7, 0.3)';
-                        postElement.style.transition = 'all 0.3s ease';
-
+                        // Add enhanced highlight effect with proper timing
                         setTimeout(() => {
-                            postElement.style.backgroundColor = '';
-                            postElement.style.borderColor = '#e2e8f0';
-                            postElement.style.boxShadow = '';
-                        }, 3000);
+                            postElement.style.backgroundColor = '#fff3cd';
+                            postElement.style.borderColor = '#ffc107';
+                            postElement.style.boxShadow = '0 0 20px rgba(255, 193, 7, 0.3)';
+                            postElement.style.transform = 'scale(1.02)';
+                            postElement.style.transition = 'all 0.3s ease';
+
+                            setTimeout(() => {
+                                postElement.style.backgroundColor = '';
+                                postElement.style.borderColor = '#e2e8f0';
+                                postElement.style.boxShadow = '';
+                                postElement.style.transform = '';
+                            }, 3000);
+                        }, 600); // Wait for scroll to mostly complete
                     }
                 });
             });
         }
 
-        // Enhanced smooth scrolling function with fallbacks
+        // Enhanced smooth scrolling function - JavaScript only implementation
         function smoothScrollTo(element, options = {}) {
+            if (!element) return;
+
             const defaultOptions = {
-                behavior: 'smooth',
                 block: 'center',
-                inline: 'nearest'
+                duration: 1000,
+                easing: 'easeInOutCubic'
             };
 
             const scrollOptions = { ...defaultOptions, ...options };
 
-            try {
-                // Try modern smooth scrolling first
-                element.scrollIntoView(scrollOptions);
-            } catch (error) {
-                // Fallback for older browsers
-                try {
-                    element.scrollIntoView(true);
+            // Get target position
+            const targetRect = element.getBoundingClientRect();
+            const startY = window.pageYOffset;
 
-                    // Manual smooth scroll animation as fallback
-                    const targetY = element.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2);
-                    const startY = window.pageYOffset;
-                    const distance = targetY - startY;
-                    const duration = 800;
-                    let startTime = null;
+            // Calculate target position based on block option
+            let targetY;
+            switch (scrollOptions.block) {
+                case 'start':
+                    targetY = targetRect.top + startY - 20; // 20px offset from top
+                    break;
+                case 'center':
+                    targetY = targetRect.top + startY - (window.innerHeight / 2) + (targetRect.height / 2);
+                    break;
+                case 'end':
+                    targetY = targetRect.top + startY - window.innerHeight + targetRect.height + 20;
+                    break;
+                default:
+                    targetY = targetRect.top + startY - (window.innerHeight / 2);
+            }
 
-                    function animate(currentTime) {
-                        if (startTime === null) startTime = currentTime;
-                        const timeElapsed = currentTime - startTime;
-                        const progress = Math.min(timeElapsed / duration, 1);
+            const distance = targetY - startY;
+            const duration = scrollOptions.duration;
+            let startTime = null;
 
-                        // Ease-in-out function
-                        const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+            // Enhanced easing functions
+            const easingFunctions = {
+                easeInOutCubic: (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
+                easeOutQuart: (t) => 1 - (--t) * t * t * t,
+                easeInOutQuart: (t) => t < 0.5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t
+            };
 
-                        window.scrollTo(0, startY + distance * ease);
+            const easeFunction = easingFunctions[scrollOptions.easing] || easingFunctions.easeInOutCubic;
 
-                        if (timeElapsed < duration) {
-                            requestAnimationFrame(animate);
-                        }
-                    }
+            function animate(currentTime) {
+                if (startTime === null) startTime = currentTime;
+                const timeElapsed = currentTime - startTime;
+                const progress = Math.min(timeElapsed / duration, 1);
+                const ease = easeFunction(progress);
 
+                const currentY = startY + distance * ease;
+                window.scrollTo(0, currentY);
+
+                if (timeElapsed < duration) {
                     requestAnimationFrame(animate);
-                } catch (fallbackError) {
-                    // Final fallback - just scroll to element
-                    element.scrollIntoView();
                 }
+            }
+
+            // Only animate if there's a significant distance to scroll
+            if (Math.abs(distance) > 10) {
+                requestAnimationFrame(animate);
             }
         }
 
-        // Add missing pagination functions
+        // Enhanced pagination with better scrolling
         function changeNewsPage(direction) {
             const { combined, page, perPage } = newsPagination;
             const totalPages = Math.ceil(combined.length / perPage);
@@ -1613,12 +1627,20 @@
 
             displayNewsPaginated();
 
-            // Use enhanced smooth scrolling for pagination
-            const newsContentElement = document.getElementById('news-content');
-            smoothScrollTo(newsContentElement, { behavior: 'smooth', block: 'start' });
+            // Smooth scroll to top of news content with proper timing
+            setTimeout(() => {
+                const newsContentElement = document.getElementById('news-content');
+                if (newsContentElement) {
+                    smoothScrollTo(newsContentElement, {
+                        block: 'start',
+                        duration: 800,
+                        easing: 'easeOutQuart'
+                    });
+                }
+            }, 50); // Small delay to ensure DOM is updated
         }
 
-        // Text expansion functionality
+        // Enhanced text expansion with smooth scrolling
         function toggleExpand(bodyId, button) {
             const bodyElement = document.getElementById(bodyId);
             const isCollapsed = bodyElement.classList.contains('collapsed');
@@ -1629,10 +1651,17 @@
             } else {
                 bodyElement.classList.add('collapsed');
                 button.innerHTML = 'Show more ▼';
-                // Use enhanced smooth scrolling after collapsing
+                // Smooth scroll to element after collapsing with proper delay
                 setTimeout(() => {
-                    smoothScrollTo(bodyElement, { behavior: 'smooth', block: 'center' });
-                }, 100);
+                    const targetElement = bodyElement.closest('.post-item') || bodyElement;
+                    if (targetElement) {
+                        smoothScrollTo(targetElement, {
+                            block: 'center',
+                            duration: 600,
+                            easing: 'easeInOutQuart'
+                        });
+                    }
+                }, 350); // Longer delay to allow collapse animation
             }
         }
     </script>
