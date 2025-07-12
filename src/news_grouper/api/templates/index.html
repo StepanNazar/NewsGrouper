@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}">
     <title>News Grouper</title>
     <style>
         * {
@@ -50,8 +51,15 @@
             font-size: 1.8em;
             margin-bottom: 20px;
             color: #fff;
-            text-align: left;
+            text-align: center;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar .logo {
+            width: 100%;
         }
 
         .sidebar nav {
@@ -725,6 +733,11 @@
                 margin-bottom: 0;
             }
 
+            .sidebar .logo {
+                width: 36px;
+                height: 36px;
+            }
+
             .sidebar nav {
                 flex-direction: row;
                 gap: 8px;
@@ -779,7 +792,9 @@
 </head>
 <body>
     <div class="sidebar">
-        <h1>News Grouper</h1>
+        <h1>
+            <img src="{{ url_for('static', filename='icon.svg') }}" alt="News Grouper Logo" class="logo">
+        </h1>
         <nav>
             <a href="#" data-tab="profile-section" class="active">Profile</a>
             <a href="#" data-tab="sources-section">Sources</a>

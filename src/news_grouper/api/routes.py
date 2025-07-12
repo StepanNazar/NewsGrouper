@@ -1,15 +1,10 @@
 import json
 from datetime import datetime
 
-from apiflask import APIFlask, abort
+from apiflask import APIBlueprint, abort
 from flask import render_template
 
-from news_grouper.models.news_source import NewsSource
-from news_grouper.models.posts import Post, PostGroup
-from news_grouper.models.profiles import Profile
-from news_grouper.news_groupers import NewsGrouper
-from news_grouper.news_parsers import NewsParser
-from news_grouper.web_interface.schemas import (
+from news_grouper.api.schemas import (
     GrouperOutSchema,
     NewsInSchema,
     NewsResponseSchema,
@@ -21,42 +16,46 @@ from news_grouper.web_interface.schemas import (
     SourceOutSchema,
     SwitchProfileSchema,
 )
+from news_grouper.models.news_source import NewsSource
+from news_grouper.models.posts import Post, PostGroup
+from news_grouper.models.profiles import Profile
+from news_grouper.news_groupers import NewsGrouper
+from news_grouper.news_parsers import NewsParser
 
-app = APIFlask(__name__)
-
+bp = APIBlueprint("Api", __name__, url_prefix="/")
 current_profile: Profile | None = None
 
 
-@app.route("/")
+@bp.route("/")
 def index():
     """Serve the main page with a simple UI"""
     return render_template("index.html")
 
 
-@app.get("/api/parsers")
-@app.output(ParserOutSchema(many=True))
+@bp.get("/api/parsers")
+@bp.output(ParserOutSchema(many=True))
 def get_parsers():
     """Get a list of available parsers"""
     return NewsParser.get_all_parsers()
 
 
-@app.get("/api/groupers")
-@app.output(GrouperOutSchema(many=True))
+@bp.get("/api/groupers")
+@bp.output(GrouperOutSchema(many=True))
 def get_groupers():
     """Get a list of available groupers"""
     return NewsGrouper.get_all_groupers()
 
 
-@app.get("/api/sources")
-@app.output(SourceOutSchema(many=True))
+@bp.get("/api/sources")
+@bp.output(SourceOutSchema(many=True))
 def get_sources():
     """Get sources for current profile"""
     return current_profile.news_sources if current_profile else []
 
 
-@app.post("/api/sources")
-@app.input(SourceInSchema)
-@app.output(SourceOutSchema)
+@bp.post("/api/sources")
+@bp.input(SourceInSchema)
+@bp.output(SourceOutSchema)
 def create_source(json_data):
     """Add a new source to the current profile"""
     if not current_profile:
@@ -77,7 +76,7 @@ def create_source(json_data):
     return new_source, 201
 
 
-@app.delete("/api/sources/<int:source_id>")
+@bp.delete("/api/sources/<int:source_id>")
 def delete_source(source_id):
     """Delete a source from the current profile"""
     if not current_profile:
@@ -90,9 +89,9 @@ def delete_source(source_id):
     abort(404, message="Source not found")
 
 
-@app.post("/api/profiles")
-@app.input(ProfileSchema)
-@app.output(ProfileSchema)
+@bp.post("/api/profiles")
+@bp.input(ProfileSchema)
+@bp.output(ProfileSchema)
 def create_profile(json_data):
     """Create a new profile"""
     global current_profile
@@ -102,8 +101,8 @@ def create_profile(json_data):
     return new_profile, 201
 
 
-@app.get("/api/current-profile")
-@app.output(ProfileSchema)
+@bp.get("/api/current-profile")
+@bp.output(ProfileSchema)
 def get_current_profile():
     """Get the current profile"""
     if not current_profile:
@@ -111,9 +110,9 @@ def get_current_profile():
     return current_profile
 
 
-@app.post("/api/current-profile")
-@app.input(SwitchProfileSchema)
-@app.output(ProfileSchema)
+@bp.post("/api/current-profile")
+@bp.input(SwitchProfileSchema)
+@bp.output(ProfileSchema)
 def switch_profile(json_data):
     """Switch to a different profile"""
     global current_profile
@@ -126,9 +125,9 @@ def switch_profile(json_data):
     return current_profile
 
 
-@app.get("/api/news")
-@app.input(NewsInSchema, location="query")
-@app.output(NewsResponseSchema)
+@bp.get("/api/news")
+@bp.input(NewsInSchema, location="query")
+@bp.output(NewsResponseSchema)
 def get_news(query_data):
     """Get news with the chosen grouper"""
     if not current_profile:
@@ -165,11 +164,3 @@ def get_news(query_data):
             individual_posts.append(PostSchema().dump(item))
 
     return {"post_groups": groups, "posts": individual_posts}
-
-
-if __name__ == "__main__":
-    import webview
-
-    # create_window url parameter also accepts wsgi app but typing is not documented
-    webview.create_window("News Grouper", app, maximized=True)  # type: ignore
-    webview.start()
