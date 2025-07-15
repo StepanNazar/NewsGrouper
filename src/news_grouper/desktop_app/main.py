@@ -67,7 +67,7 @@ def create_shortcut(event) -> None:
         if sys.prefix != sys.base_prefix:
             # if running in a virtual environment, pass its interpreter
             script += f" {sys.executable}"
-        icon_path = Path(__file__).parent.parent / "api" / "static" / "icon.svg"
+        icon_path = Path(__file__).parent.parent / "api" / "static" / "icon.ico"
         make_shortcut(
             script=script,
             name=shortcut_name,
@@ -158,6 +158,6 @@ window = webview.create_window("News Grouper", app, maximized=True, text_select=
 webview.start(
     bind,
     [window],
-    icon="../api/static/icon.svg",
+    icon="../api/static/icon.ico",
     storage_path=os.path.join(os.path.dirname(__file__), "storage"),
 )
