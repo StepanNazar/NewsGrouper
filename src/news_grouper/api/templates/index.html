@@ -1189,6 +1189,7 @@
                     isAuthenticated = true;
                     updateAuthDisplay();
                     await loadProfiles();
+                    switchTab('profile-section');
                     return;
                 } catch (error) {
                     // Token might be expired, try to refresh
@@ -1198,6 +1199,7 @@
                         isAuthenticated = true;
                         updateAuthDisplay();
                         await loadProfiles();
+                        switchTab('profile-section');
                         return;
                     } catch (refreshError) {
                         // Refresh failed, clear everything
@@ -1217,6 +1219,7 @@
                 isAuthenticated = true;
                 updateAuthDisplay();
                 await loadProfiles();
+                switchTab('profile-section');
             } catch (error) {
                 // No valid authentication, show login form
                 isAuthenticated = false;

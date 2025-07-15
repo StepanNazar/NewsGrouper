@@ -209,3 +209,4 @@ __marimo__/
 .idea
 
 /src/news_grouper/api/app.db
+/src/news_grouper/desktop_app/desktop.db
