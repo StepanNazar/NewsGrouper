@@ -46,6 +46,12 @@ with Python, Flask, Gemini API, Scikit-learn and PyWebView.
     pip install -r requirements.txt
    ```
 
+1. **Get [Gemini API key](https://aistudio.google.com/apikey)**
+
+1. **Copy `.env.example` to `.env` and set your Gemini API key**
+
+   Edit the `.env` file and set `GEMINI_API_KEY` to your actual API key.
+
 1. **Run the desktop application**
 
    ```bash
@@ -82,6 +88,12 @@ with Python, Flask, Gemini API, Scikit-learn and PyWebView.
    ```bash
    flask db upgrade
    ```
+
+1. **Get [Gemini API key](https://aistudio.google.com/apikey)**
+
+1. **Copy `.env.example` to `.env` and set your Gemini API key**
+
+   Edit the `.env` file and set `GEMINI_API_KEY` to your actual API key.
 
 1. **Run the development server**
 
