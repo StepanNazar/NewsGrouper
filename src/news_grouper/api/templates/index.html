@@ -410,6 +410,27 @@
             background: #c53030;
         }
 
+        .source-item.selected {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .source-item.selected .source-name {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .source-item.selected .source-name::before {
+            content: '✓ ';
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .source-item.selected .source-details {
+            color: #5a67d8;
+        }
+
         .news-content {
             background: transparent;
             border-radius: 0;
@@ -788,15 +809,118 @@
                 max-width: none;
             }
         }
+
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .auth-form h2 {
+            margin-bottom: 24px;
+            color: #2d3748;
+            text-align: center;
+        }
+
+        .auth-form p {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .auth-form a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .auth-form a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+    <!-- Login/Register Modal -->
+    <div id="auth-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="login-form" class="auth-form">
+                <h2>Login</h2>
+                <form id="login-form-element">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                    <p><a href="#" id="show-register">Don't have an account? Register</a></p>
+                </form>
+            </div>
+            <div id="register-form" class="auth-form" style="display: none;">
+                <h2>Register</h2>
+                <form id="register-form-element">
+                    <div class="form-group">
+                        <label for="register-first-name">First Name:</label>
+                        <input type="text" id="register-first-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-last-name">Last Name:</label>
+                        <input type="text" id="register-last-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email:</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password:</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <button type="submit">Register</button>
+                    <p><a href="#" id="show-login">Already have an account? Login</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="sidebar">
         <h1>
             <img src="{{ url_for('static', filename='icon.svg') }}" alt="News Grouper Logo" class="logo">
         </h1>
         <nav>
-            <a href="#" data-tab="profile-section" class="active">Profile</a>
+            <a href="#" data-tab="auth-section" class="active">Authentication</a>
+            <a href="#" data-tab="profile-section">Profiles</a>
             <a href="#" data-tab="sources-section">Sources</a>
             <a href="#" data-tab="news-section">Fetch News</a>
         </nav>
@@ -804,14 +928,86 @@
             <strong>Current Profile:</strong> <span id="profile-name"></span><br>
             <span id="profile-description"></span>
         </div>
+        <div id="user-info" class="profile-info" style="display: none;">
+            <strong>Logged in as:</strong> <span id="user-name"></span><br>
+            <span id="user-email"></span><br>
+            <button id="logout-btn" style="margin-top: 10px; padding: 8px 16px; font-size: 0.8em;">Logout</button>
+        </div>
     </div>
 
     <div class="main-content">
         <div id="messages"></div>
 
         <div class="container">
+            <!-- Authentication Section -->
+            <div class="section active" id="auth-section">
+                <div class="section-header">
+                    <h2>Authentication</h2>
+                </div>
+                <div class="section-content">
+                    <div id="auth-not-logged-in" class="grid">
+                        <div class="form-section">
+                            <h3>Login</h3>
+                            <form id="login-form-main">
+                                <div class="form-group">
+                                    <label for="main-login-email">Email:</label>
+                                    <input type="email" id="main-login-email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="main-login-password">Password:</label>
+                                    <input type="password" id="main-login-password" required>
+                                </div>
+                                <button type="submit">Login</button>
+                            </form>
+                        </div>
+                        <div class="form-section">
+                            <h3>Register</h3>
+                            <form id="register-form-main">
+                                <div class="form-group">
+                                    <label for="main-register-first-name">First Name:</label>
+                                    <input type="text" id="main-register-first-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="main-register-last-name">Last Name:</label>
+                                    <input type="text" id="main-register-last-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="main-register-email">Email:</label>
+                                    <input type="email" id="main-register-email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="main-register-password">Password:</label>
+                                    <input type="password" id="main-register-password" required>
+                                </div>
+                                <button type="submit">Register</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="auth-logged-in" style="display: none;">
+                        <div class="form-section">
+                            <h3>User Information</h3>
+                            <div id="user-details">
+                                <div class="form-group">
+                                    <label>Name:</label>
+                                    <div id="user-full-name" style="padding: 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email:</label>
+                                    <div id="user-email-display" style="padding: 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Account Created:</label>
+                                    <div id="user-created" style="padding: 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+                                </div>
+                                <button id="logout-btn-main" style="background: #e74c3c; margin-top: 16px;">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Profile Management -->
-            <div class="section active" id="profile-section">
+            <div class="section" id="profile-section">
                 <div class="section-header">
                     <h2>Profile Management</h2>
                 </div>
@@ -826,31 +1022,17 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="new-profile-description">Description:</label>
-                                    <textarea id="new-profile-description" rows="3"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="new-profile-path">Save File Path:</label>
-                                    <input type="text" id="new-profile-path" placeholder="e.g., /path/to/profile.json" required>
-                                    <small>Enter the full path where you want to save this profile. Browser security prevents using a file save dialog.</small>
+                                    <textarea id="new-profile-description" rows="3" required></textarea>
                                 </div>
                                 <button type="submit">Create Profile</button>
                             </form>
                         </div>
 
-                        <div class="form-section">
-                            <h3>Load Existing Profile</h3>
-                            <form onsubmit="loadProfile();return false;">
-                                <div class="form-group">
-                                    <label>Select Profile File:</label>
-                                    <div class="file-input-wrapper">
-                                        <input type="file" id="profile-file" class="file-input" accept=".json">
-                                        <div class="file-input-display">
-                                            <span id="file-display-text">Click to select profile file</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button id="load-profile-btn" type="submit">Load Profile</button>
-                            </form>
+                        <div>
+                            <h3 style="margin-bottom: 16px; color: #2d3748; font-size: 1.1em; font-weight: 600;">Your Profiles</h3>
+                            <div id="profiles-list" class="sources-list">
+                                <div class="loading">Loading profiles...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -889,7 +1071,7 @@
                         <div>
                             <h3 style="margin-bottom: 16px; color: #2d3748; font-size: 1.1em; font-weight: 600;">Current Sources</h3>
                             <div id="sources-list" class="sources-list">
-                                <div class="loading">No profile loaded</div>
+                                <div class="loading">Select a profile to view sources</div>
                             </div>
                         </div>
                     </div>
@@ -931,7 +1113,7 @@
                     <div>
                         <h3 style="margin-bottom: 16px; color: #2d3748; font-size: 1.1em; font-weight: 600;">News Content</h3>
                         <div id="news-content" class="news-content">
-                            <div class="loading">Fetch news to see content here</div>
+                            <div class="loading">Select a profile and fetch news to see content here</div>
                         </div>
                     </div>
                 </div>
@@ -941,8 +1123,11 @@
 
     <script>
         let currentProfile = null;
+        let currentUser = null;
+        let accessToken = null;
         let parsers = [];
         let groupers = [];
+        let isAuthenticated = false;
 
         // Pagination state for unified list
         let newsPagination = {
@@ -951,65 +1136,158 @@
             perPage: 5
         };
 
-        // Function to convert server time to local timezone
-        function formatLocalTime(timeString) {
-            if (!timeString) return '';
-
-            // Parse the server-provided time string
-            const date = new Date(timeString);
-
-            // Check if the date is valid
-            if (isNaN(date.getTime())) {
-                return timeString; // Return original string if parsing fails
-            }
-
-            // Format the date in the client's local timezone
-            return date.toLocaleString();
-        }
-
-        // Tab switching functionality
-        function switchTab(tabId) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-
-            // Show selected section
-            document.getElementById(tabId).classList.add('active');
-
-            // Update active nav link
-            document.querySelectorAll('.sidebar nav a').forEach(link => {
-                link.classList.remove('active');
-            });
-            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-        }
-
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
-            loadParsers();
-            loadGroupers();
             setupEventListeners();
-            checkCurrentProfile();
+            loadFromLocalStorage();
+            checkAuthentication();
         });
 
-        async function checkCurrentProfile() {
-            try {
-                currentProfile = await apiCall('/current-profile');
-                updateProfileDisplay();
-                loadSources();
-                showMessage('Profile loaded successfully!', 'success');
-            } catch (error) {
-                // No profile is loaded, that's okay
-                console.log('No profile currently loaded');
+        function loadFromLocalStorage() {
+            // Load current profile from localStorage
+            const storedProfile = localStorage.getItem('currentProfile');
+            if (storedProfile) {
+                try {
+                    currentProfile = JSON.parse(storedProfile);
+                    updateProfileDisplay();
+                } catch (e) {
+                    localStorage.removeItem('currentProfile');
+                }
             }
+
+            // Load access token from localStorage
+            const storedToken = localStorage.getItem('accessToken');
+            if (storedToken) {
+                accessToken = storedToken;
+            }
+        }
+
+        function saveToLocalStorage() {
+            if (currentProfile) {
+                localStorage.setItem('currentProfile', JSON.stringify(currentProfile));
+            } else {
+                localStorage.removeItem('currentProfile');
+            }
+
+            if (accessToken) {
+                localStorage.setItem('accessToken', accessToken);
+            } else {
+                localStorage.removeItem('accessToken');
+            }
+        }
+
+        async function checkAuthentication() {
+            // Always load parsers and groupers regardless of authentication
+            await loadParsers();
+            await loadGroupers();
+
+            // First try to use stored token
+            if (accessToken) {
+                try {
+                    currentUser = await apiCall('/whoami');
+                    isAuthenticated = true;
+                    updateAuthDisplay();
+                    await loadProfiles();
+                    return;
+                } catch (error) {
+                    // Token might be expired, try to refresh
+                    try {
+                        await refreshToken();
+                        currentUser = await apiCall('/whoami');
+                        isAuthenticated = true;
+                        updateAuthDisplay();
+                        await loadProfiles();
+                        return;
+                    } catch (refreshError) {
+                        // Refresh failed, clear everything
+                        accessToken = null;
+                        currentUser = null;
+                        isAuthenticated = false;
+                        saveToLocalStorage();
+                    }
+                }
+            }
+
+            // If we reach here, user is not authenticated
+            // Try to refresh token anyway in case there's a refresh cookie
+            try {
+                await refreshToken();
+                currentUser = await apiCall('/whoami');
+                isAuthenticated = true;
+                updateAuthDisplay();
+                await loadProfiles();
+            } catch (error) {
+                // No valid authentication, show login form
+                isAuthenticated = false;
+                updateAuthDisplay();
+            }
+        }
+
+        async function refreshToken() {
+            // Get CSRF token from cookie
+            const csrfToken = getCookie('csrf_refresh_token');
+
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (csrfToken) {
+                headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+
+            const response = await fetch('/api/refresh', {
+                method: 'POST',
+                headers: headers
+            });
+
+            if (!response.ok) {
+                throw new Error('Token refresh failed');
+            }
+
+            const data = await response.json();
+            accessToken = data.access_token;
+            saveToLocalStorage();
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
         }
 
         function setupEventListeners() {
-            // Tab navigation
+            // Auth modal
+            document.getElementById('show-register').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('register-form').style.display = 'block';
+            });
+
+            document.getElementById('show-login').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('register-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+            });
+
+            document.querySelector('.close').addEventListener('click', hideAuthModal);
+
+            // Auth forms
+            document.getElementById('login-form-element').addEventListener('submit', handleLogin);
+            document.getElementById('register-form-element').addEventListener('submit', handleRegister);
+            document.getElementById('login-form-main').addEventListener('submit', handleMainLogin);
+            document.getElementById('register-form-main').addEventListener('submit', handleMainRegister);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('logout-btn-main').addEventListener('click', handleLogout);
+
+            // Tab navigation - Remove authentication checks
             document.querySelectorAll('.sidebar nav a').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     const tabId = this.getAttribute('data-tab');
+
+                    // Handle tab-specific actions when switching to them
+                    handleTabSwitch(tabId);
+
                     switchTab(tabId);
                 });
             });
@@ -1024,81 +1302,463 @@
             // News fetching
             document.getElementById('fetch-news-form').addEventListener('submit', fetchNews);
             document.getElementById('grouper-select').addEventListener('change', updateGrouperInfo);
+        }
 
-            // File input
-            document.getElementById('profile-file').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    document.getElementById('file-display-text').textContent = file.name;
+        // Handle tab-specific actions when switching tabs
+        async function handleTabSwitch(tabId) {
+            switch (tabId) {
+                case 'profile-section':
+                    if (isAuthenticated) {
+                        await loadProfiles();
+                    } else {
+                        document.getElementById('profiles-list').innerHTML = '<div class="loading">Please log in to view profiles</div>';
+                    }
+                    break;
+                case 'sources-section':
+                    // Always load parsers when visiting sources tab
+                    await loadParsers();
+                    if (isAuthenticated) {
+                        await loadSources();
+                    } else {
+                        document.getElementById('sources-list').innerHTML = '<div class="loading">Please log in to view sources</div>';
+                    }
+                    break;
+                case 'news-section':
+                    // Always load groupers when visiting news tab
+                    await loadGroupers();
+                    if (!isAuthenticated) {
+                        document.getElementById('news-content').innerHTML = '<div class="loading">Please log in to fetch news</div>';
+                    }
+                    break;
+            }
+        }
+
+        function updateAuthDisplay() {
+            if (isAuthenticated && currentUser) {
+                document.getElementById('auth-not-logged-in').style.display = 'none';
+                document.getElementById('auth-logged-in').style.display = 'block';
+                document.getElementById('user-info').style.display = 'block';
+
+                // Update user info in sidebar
+                document.getElementById('user-name').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+                document.getElementById('user-email').textContent = currentUser.email;
+
+                // Update user info in auth section
+                document.getElementById('user-full-name').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+                document.getElementById('user-email-display').textContent = currentUser.email;
+                document.getElementById('user-created').textContent = formatLocalTime(currentUser.created);
+
+                hideAuthModal();
+            } else {
+                document.getElementById('auth-not-logged-in').style.display = 'block';
+                document.getElementById('auth-logged-in').style.display = 'none';
+                document.getElementById('user-info').style.display = 'none';
+            }
+        }
+
+        function showAuthModal() {
+            document.getElementById('auth-modal').style.display = 'block';
+        }
+
+        function hideAuthModal() {
+            document.getElementById('auth-modal').style.display = 'none';
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            await performLogin(email, password);
+        }
+
+        async function handleMainLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('main-login-email').value;
+            const password = document.getElementById('main-login-password').value;
+            await performLogin(email, password);
+        }
+
+        async function performLogin(email, password) {
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Login failed');
                 }
+
+                const data = await response.json();
+                accessToken = data.access_token;
+                saveToLocalStorage();
+
+                await checkAuthentication();
+                showMessage('Logged in successfully!', 'success');
+
+                // Clear form fields
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-password').value = '';
+                document.getElementById('main-login-email').value = '';
+                document.getElementById('main-login-password').value = '';
+
+                // Switch to profiles tab after successful login
+                switchTab('profile-section');
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('register-first-name').value;
+            const lastName = document.getElementById('register-last-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            await performRegister(firstName, lastName, email, password);
+        }
+
+        async function handleMainRegister(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('main-register-first-name').value;
+            const lastName = document.getElementById('main-register-last-name').value;
+            const email = document.getElementById('main-register-email').value;
+            const password = document.getElementById('main-register-password').value;
+            await performRegister(firstName, lastName, email, password);
+        }
+
+        async function performRegister(firstName, lastName, email, password) {
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: lastName,
+                        email,
+                        password
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Registration failed');
+                }
+
+                const data = await response.json();
+                accessToken = data.access_token;
+                saveToLocalStorage();
+
+                await checkAuthentication();
+                showMessage('Registered successfully!', 'success');
+
+                // Clear form fields
+                document.getElementById('register-first-name').value = '';
+                document.getElementById('register-last-name').value = '';
+                document.getElementById('register-email').value = '';
+                document.getElementById('register-password').value = '';
+                document.getElementById('main-register-first-name').value = '';
+                document.getElementById('main-register-last-name').value = '';
+                document.getElementById('main-register-email').value = '';
+                document.getElementById('main-register-password').value = '';
+
+                // Switch to profiles tab after successful registration
+                switchTab('profile-section');
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await apiCall('/logout', { method: 'POST' });
+            } catch (error) {
+                // Ignore logout errors
+            }
+
+            accessToken = null;
+            currentUser = null;
+            currentProfile = null;
+            isAuthenticated = false;
+            localStorage.clear();
+
+            updateAuthDisplay();
+            updateProfileDisplay();
+            showMessage('Logged out successfully!', 'success');
+
+            // Switch to auth tab after logout
+            switchTab('auth-section');
+        }
+
+        function switchTab(tabId) {
+            // Remove active class from all sections and nav links
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
             });
+            document.querySelectorAll('.sidebar nav a').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Add active class to selected section and nav link
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
         }
 
         async function apiCall(endpoint, options = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+
+            if (accessToken) {
+                headers['Authorization'] = `Bearer ${accessToken}`;
+            }
+
             try {
                 const response = await fetch(`/api${endpoint}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...options.headers
-                    },
+                    headers,
                     ...options
                 });
+
+                if (response.status === 401) {
+                    // Token expired, try to refresh
+                    try {
+                        await refreshToken();
+                        // Retry the original request
+                        headers['Authorization'] = `Bearer ${accessToken}`;
+                        const retryResponse = await fetch(`/api${endpoint}`, {
+                            headers,
+                            ...options
+                        });
+
+                        if (!retryResponse.ok) {
+                            const error = await retryResponse.json();
+                            throw new Error(error.message || 'API request failed');
+                        }
+
+                        const text = await retryResponse.text();
+                        return text ? JSON.parse(text) : {};
+                    } catch (refreshError) {
+                        // Refresh failed, redirect to login
+                        accessToken = null;
+                        currentUser = null;
+                        isAuthenticated = false;
+                        saveToLocalStorage();
+                        updateAuthDisplay();
+                        switchTab('auth-section');
+                        throw new Error('Session expired. Please log in again.');
+                    }
+                }
 
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.message || 'API request failed');
                 }
 
-                // Handle empty responses (common for DELETE operations)
                 const text = await response.text();
-                if (!text) {
-                    return {}; // Return empty object for successful empty responses
-                }
-
-                return JSON.parse(text);
+                return text ? JSON.parse(text) : {};
             } catch (error) {
                 showMessage(error.message, 'error');
                 throw error;
             }
         }
 
-        function showMessage(message, type = 'error') {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = type;
+        // Function to convert server time to local timezone
+        function formatLocalTime(timeString) {
+            if (!timeString) return '';
+            const date = new Date(timeString);
+            if (isNaN(date.getTime())) {
+                return timeString;
+            }
+            return date.toLocaleString();
+        }
 
-            // Create message text element
-            const messageText = document.createElement('span');
-            messageText.textContent = message;
+        function updateProfileDisplay() {
+            if (currentProfile) {
+                document.getElementById('current-profile').style.display = 'block';
+                document.getElementById('profile-name').textContent = currentProfile.name;
+                document.getElementById('profile-description').textContent = currentProfile.description || '';
+            } else {
+                document.getElementById('current-profile').style.display = 'none';
+            }
+        }
 
-            // Create close button
-            const closeButton = document.createElement('button');
-            closeButton.innerHTML = '&times;';
-            closeButton.style.background = 'none';
-            closeButton.style.border = 'none';
-            closeButton.style.color = 'inherit';
-            closeButton.style.float = 'right';
-            closeButton.style.fontSize = '16px';
-            closeButton.style.cursor = 'pointer';
-            closeButton.style.padding = '0 5px';
-            closeButton.style.marginLeft = '10px';
-            closeButton.onclick = function() {
-                messageDiv.remove();
+        async function loadProfiles() {
+            try {
+                const response = await apiCall('/profiles');
+                const profiles = response.items || [];
+                const profilesList = document.getElementById('profiles-list');
+
+                if (profiles.length === 0) {
+                    profilesList.innerHTML = '<div class="loading">No profiles found. Create one to get started!</div>';
+                    return;
+                }
+
+                profilesList.innerHTML = profiles.map(profile => {
+                    const isSelected = currentProfile && currentProfile.id === profile.id;
+                    return `
+                        <div class="source-item ${isSelected ? 'selected' : ''}">
+                            <div class="source-info">
+                                <div class="source-name">${profile.name}</div>
+                                <div class="source-details">${profile.description}</div>
+                            </div>
+                            <div>
+                                <button onclick="selectProfile(${profile.id})" style="background: #667eea; margin-right: 8px;">${isSelected ? 'Selected' : 'Select'}</button>
+                                <button onclick="deleteProfile(${profile.id})" style="background: #e74c3c;">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                document.getElementById('profiles-list').innerHTML = '<div class="loading">Failed to load profiles</div>';
+            }
+        }
+
+        async function selectProfile(profileId) {
+            try {
+                currentProfile = await apiCall(`/profiles/${profileId}`);
+                updateProfileDisplay();
+                saveToLocalStorage();
+                await loadSources();
+                await loadProfiles(); // Refresh the profile list to update selected state
+                showMessage('Profile selected successfully!', 'success');
+            } catch (error) {
+                console.error('Failed to select profile:', error);
+            }
+        }
+
+        async function deleteProfile(profileId) {
+            if (!confirm('Are you sure you want to delete this profile?')) {
+                return;
+            }
+
+            try {
+                await apiCall(`/profiles/${profileId}`, { method: 'DELETE' });
+
+                // If deleted profile was current, clear it
+                if (currentProfile && currentProfile.id === profileId) {
+                    currentProfile = null;
+                    updateProfileDisplay();
+                    saveToLocalStorage();
+                    document.getElementById('sources-list').innerHTML = '<div class="loading">Select a profile to view sources</div>';
+                }
+
+                await loadProfiles();
+                showMessage('Profile deleted successfully!', 'success');
+            } catch (error) {
+                console.error('Failed to delete profile:', error);
+            }
+        }
+
+        async function loadSources() {
+            if (!currentProfile) {
+                document.getElementById('sources-list').innerHTML = '<div class="loading">Select a profile to view sources</div>';
+                return;
+            }
+
+            try {
+                const response = await apiCall(`/profiles/${currentProfile.id}/sources`);
+                const sources = response.items || [];
+                const sourcesList = document.getElementById('sources-list');
+
+                if (sources.length === 0) {
+                    sourcesList.innerHTML = '<div class="loading">No sources configured for this profile</div>';
+                    return;
+                }
+
+                sourcesList.innerHTML = sources.map(source => `
+                    <div class="source-item">
+                        <div class="source-info">
+                            <div class="source-name">${source.name}</div>
+                            <div class="source-details">${source.parser_name} - ${source.link}</div>
+                        </div>
+                        <button onclick="deleteSource(${source.id})" style="background: #e74c3c;">Delete</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('sources-list').innerHTML = '<div class="loading">Failed to load sources</div>';
+            }
+        }
+
+        async function addSource(e) {
+            e.preventDefault();
+
+            if (!isAuthenticated) {
+                showMessage('Please log in to add sources', 'error');
+                return;
+            }
+
+            if (!currentProfile) {
+                showMessage('Please select a profile first', 'error');
+                return;
+            }
+
+            const sourceData = {
+                name: document.getElementById('source-name').value,
+                parser_name: document.getElementById('source-parser').value,
+                link: document.getElementById('source-link').value
             };
 
-            // Append elements to message div
-            messageDiv.appendChild(messageText);
-            messageDiv.appendChild(closeButton);
+            try {
+                await apiCall(`/profiles/${currentProfile.id}/sources`, {
+                    method: 'POST',
+                    body: JSON.stringify(sourceData)
+                });
 
-            // Add to messages container
-            messagesDiv.appendChild(messageDiv);
+                await loadSources();
+                showMessage('Source added successfully!', 'success');
+                document.getElementById('source-name').value = '';
+                document.getElementById('source-link').value = '';
+            } catch (error) {
+                console.error('Failed to add source:', error);
+            }
+        }
 
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.remove();
-                }
-            }, 5000);
+        async function deleteSource(sourceId) {
+            if (!confirm('Are you sure you want to delete this source?')) {
+                return;
+            }
+
+            try {
+                await apiCall(`/sources/${sourceId}`, { method: 'DELETE' });
+                await loadSources();
+                showMessage('Source deleted successfully!', 'success');
+            } catch (error) {
+                console.error('Failed to delete source:', error);
+            }
+        }
+
+        async function createProfile(e) {
+            e.preventDefault();
+
+            if (!isAuthenticated) {
+                showMessage('Please log in to create profiles', 'error');
+                return;
+            }
+
+            const profileData = {
+                name: document.getElementById('new-profile-name').value,
+                description: document.getElementById('new-profile-description').value
+            };
+
+            try {
+                const profile = await apiCall('/profiles', {
+                    method: 'POST',
+                    body: JSON.stringify(profileData)
+                });
+
+                await loadProfiles();
+                showMessage('Profile created successfully!', 'success');
+                document.getElementById('create-profile-form').reset();
+            } catch (error) {
+                console.error('Failed to create profile:', error);
+            }
         }
 
         async function loadParsers() {
@@ -1106,7 +1766,12 @@
                 const select = document.getElementById('source-parser');
                 select.innerHTML = '<option value="">Loading parsers...</option>';
 
-                parsers = await apiCall('/parsers');
+                // Make API call without authentication for parsers
+                const response = await fetch('/api/parsers');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch parsers');
+                }
+                parsers = await response.json();
 
                 select.innerHTML = '<option value="">Select a parser...</option>';
                 if (parsers && parsers.length > 0) {
@@ -1116,18 +1781,13 @@
                         option.textContent = parser.name;
                         select.appendChild(option);
                     });
-
-                    // Select first parser by default
                     select.value = parsers[0].name;
                     updateParserInfo();
                 } else {
                     select.innerHTML = '<option value="">No parsers available</option>';
-                    showMessage('No parsers available', 'error');
                 }
             } catch (error) {
-                console.error('Failed to load parsers:', error);
                 document.getElementById('source-parser').innerHTML = '<option value="">Failed to load parsers</option>';
-                showMessage('Failed to load parsers: ' + error.message, 'error');
             }
         }
 
@@ -1136,7 +1796,12 @@
                 const select = document.getElementById('grouper-select');
                 select.innerHTML = '<option value="">Loading groupers...</option>';
 
-                groupers = await apiCall('/groupers');
+                // Make API call without authentication for groupers
+                const response = await fetch('/api/groupers');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch groupers');
+                }
+                groupers = await response.json();
 
                 select.innerHTML = '<option value="">Select a grouper...</option>';
                 if (groupers && groupers.length > 0) {
@@ -1146,18 +1811,13 @@
                         option.textContent = grouper.name;
                         select.appendChild(option);
                     });
-
-                    // Select first grouper by default
                     select.value = groupers[0].name;
                     updateGrouperInfo();
                 } else {
                     select.innerHTML = '<option value="">No groupers available</option>';
-                    showMessage('No groupers available', 'error');
                 }
             } catch (error) {
-                console.error('Failed to load groupers:', error);
                 document.getElementById('grouper-select').innerHTML = '<option value="">Failed to load groupers</option>';
-                showMessage('Failed to load groupers: ' + error.message, 'error');
             }
         }
 
@@ -1169,15 +1829,12 @@
             if (selectedParser) {
                 const parser = parsers.find(p => p.name === selectedParser);
                 if (parser) {
-                    // Show description
                     if (parser.description) {
                         descriptionElement.textContent = parser.description;
                         descriptionElement.classList.add('visible');
                     } else {
                         descriptionElement.classList.remove('visible');
                     }
-
-                    // Show hint
                     if (parser.link_hint) {
                         hintElement.textContent = `Hint: ${parser.link_hint}`;
                     } else {
@@ -1210,147 +1867,45 @@
             }
         }
 
-        async function createProfile(e) {
-            e.preventDefault(); // This prevents the default form submission
-
-            const profileData = {
-                name: document.getElementById('new-profile-name').value,
-                description: document.getElementById('new-profile-description').value,
-                file_path: document.getElementById('new-profile-path').value
+        function showMessage(message, type = 'error') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            const messageText = document.createElement('span');
+            messageText.textContent = message;
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '&times;';
+            closeButton.style.background = 'none';
+            closeButton.style.border = 'none';
+            closeButton.style.color = 'inherit';
+            closeButton.style.float = 'right';
+            closeButton.style.fontSize = '16px';
+            closeButton.style.cursor = 'pointer';
+            closeButton.style.padding = '0 5px';
+            closeButton.style.marginLeft = '10px';
+            closeButton.onclick = function() {
+                messageDiv.remove();
             };
-
-            try {
-                const profile = await apiCall('/profiles', {
-                    method: 'POST',
-                    body: JSON.stringify(profileData)
-                });
-
-                currentProfile = profile;
-                updateProfileDisplay();
-                loadSources();
-                showMessage('Profile created successfully!', 'success');
-                document.getElementById('create-profile-form').reset();
-            } catch (error) {
-                console.error('Failed to create profile:', error);
-                showMessage('Failed to create profile: ' + error.message, 'error');
-            }
-
-            return false; // Ensure no form submission occurs
-        }
-
-        async function loadProfile() {
-            const fileInput = document.getElementById('profile-file');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                showMessage('Please select a profile file', 'error');
-                return;
-            }
-
-            try {
-                const profile = await apiCall('/current-profile', {
-                    method: 'POST',
-                    body: JSON.stringify({ profile_path: file.name })
-                });
-
-                currentProfile = profile;
-                updateProfileDisplay();
-                loadSources();
-                showMessage('Profile loaded successfully!', 'success');
-            } catch (error) {
-                console.error('Failed to load profile:', error);
-            }
-        }
-
-        function updateProfileDisplay() {
-            if (currentProfile) {
-                document.getElementById('current-profile').style.display = 'block';
-                document.getElementById('profile-name').textContent = currentProfile.name;
-                document.getElementById('profile-description').textContent = currentProfile.description || '';
-            } else {
-                document.getElementById('current-profile').style.display = 'none';
-            }
-        }
-
-        async function loadSources() {
-            try {
-                const sources = await apiCall('/sources');
-                const sourcesList = document.getElementById('sources-list');
-
-                if (sources.length === 0) {
-                    sourcesList.innerHTML = '<div class="loading">No sources configured</div>';
-                    return;
+            messageDiv.appendChild(messageText);
+            messageDiv.appendChild(closeButton);
+            messagesDiv.appendChild(messageDiv);
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
                 }
-
-                sourcesList.innerHTML = sources.map(source => `
-                    <div class="source-item">
-                        <div class="source-info">
-                            <div class="source-name">${source.name}</div>
-                            <div class="source-details">${source.parser_name} - ${source.link}</div>
-                        </div>
-                        <button onclick="deleteSource(${source.id})" style="background: #e74c3c;">Delete</button>
-                    </div>
-                `).join('');
-            } catch (error) {
-                document.getElementById('sources-list').innerHTML = '<div class="loading">No profile loaded</div>';
-            }
-        }
-
-        async function addSource(e) {
-            e.preventDefault();
-
-            if (!currentProfile) {
-                showMessage('Please load a profile first', 'error');
-                return;
-            }
-
-            const sourceData = {
-                name: document.getElementById('source-name').value,
-                parser_name: document.getElementById('source-parser').value,
-                link: document.getElementById('source-link').value
-            };
-
-            try {
-                await apiCall('/sources', {
-                    method: 'POST',
-                    body: JSON.stringify(sourceData)
-                });
-
-                loadSources();
-                showMessage('Source added successfully!', 'success');
-                // Clear only name and link fields, preserve parser selection
-                document.getElementById('source-name').value = '';
-                document.getElementById('source-link').value = '';
-                document.getElementById('parser-hint').textContent = '';
-            } catch (error) {
-                console.error('Failed to add source:', error);
-            }
-        }
-
-        async function deleteSource(sourceId) {
-            if (!confirm('Are you sure you want to delete this source?')) {
-                return;
-            }
-
-            try {
-                await apiCall(`/sources/${sourceId}`, {
-                    method: 'DELETE'
-                });
-
-                loadSources();
-                showMessage('Source deleted successfully!', 'success');
-            } catch (error) {
-                console.error('Failed to delete source:', error);
-                // Still refresh the sources list in case the deletion actually worked
-                loadSources();
-            }
+            }, 5000);
         }
 
         async function fetchNews(e) {
             e.preventDefault();
 
+            if (!isAuthenticated) {
+                showMessage('Please log in to fetch news', 'error');
+                return;
+            }
+
             if (!currentProfile) {
-                showMessage('Please load a profile first', 'error');
+                showMessage('Please select a profile first', 'error');
                 return;
             }
 
@@ -1367,19 +1922,15 @@
             newsContent.innerHTML = '<div class="loading">Fetching news...</div>';
 
             try {
-                // Add timezone offset to datetime values
                 const addTimezoneOffset = (dateTimeStr) => {
                     if (!dateTimeStr) return '';
-                    // Create a Date object from the datetime-local value
                     const date = new Date(dateTimeStr);
-                    // Get timezone offset in minutes and convert to hours:minutes format
                     const tzOffset = -date.getTimezoneOffset();
                     const tzOffsetHours = Math.floor(Math.abs(tzOffset) / 60);
                     const tzOffsetMinutes = Math.abs(tzOffset) % 60;
                     const tzOffsetStr = (tzOffset >= 0 ? '+' : '-') +
                                        String(tzOffsetHours).padStart(2, '0') + ':' +
                                        String(tzOffsetMinutes).padStart(2, '0');
-                    // Return ISO string with timezone offset
                     return dateTimeStr + tzOffsetStr;
                 };
 
@@ -1387,8 +1938,7 @@
                 if (fromDateTime) params.append('from_datetime', addTimezoneOffset(fromDateTime));
                 if (toDateTime) params.append('to_datetime', addTimezoneOffset(toDateTime));
 
-                const newsData = await apiCall(`/news?${params}`);
-                // Combine post groups and posts into a single list
+                const newsData = await apiCall(`/profiles/${currentProfile.id}/news?${params}`);
                 newsPagination.combined = [];
                 (newsData.post_groups || []).forEach((group, idx) => {
                     newsPagination.combined.push({ type: 'group', data: group, groupIndex: idx });
@@ -1399,7 +1949,6 @@
                 newsPagination.page = 1;
                 displayNewsPaginated();
                 showMessage('News fetched successfully!', 'success');
-                // Don't reset the form - preserve all selections
             } catch (error) {
                 newsContent.innerHTML = '<div class="error">Failed to fetch news</div>';
                 console.error('Failed to fetch news:', error);
@@ -1426,7 +1975,7 @@
             const postGroups = itemsToShow.filter(item => item.type === 'group');
             const individualPosts = itemsToShow.filter(item => item.type === 'post');
 
-            // Calculate total articles (articles within groups + individual articles)
+            // Calculate total articles
             const totalArticlesInGroups = combined.filter(item => item.type === 'group')
                 .reduce((sum, item) => sum + item.data.posts.length, 0);
             const totalIndividualArticles = combined.filter(item => item.type === 'post').length;
@@ -1537,14 +2086,12 @@
 
                     const postElement = document.getElementById(`group-${groupIndex}-post-${parseInt(ref) - 1}`);
                     if (postElement) {
-                        // Enhanced smooth scrolling with highlight
                         smoothScrollTo(postElement, {
                             block: 'center',
                             duration: 1200,
                             easing: 'easeInOutCubic'
                         });
 
-                        // Add enhanced highlight effect with proper timing
                         setTimeout(() => {
                             postElement.style.backgroundColor = '#fff3cd';
                             postElement.style.borderColor = '#ffc107';
@@ -1558,13 +2105,13 @@
                                 postElement.style.boxShadow = '';
                                 postElement.style.transform = '';
                             }, 3000);
-                        }, 600); // Wait for scroll to mostly complete
+                        }, 600);
                     }
                 });
             });
         }
 
-        // Enhanced smooth scrolling function - JavaScript only implementation
+        // Enhanced smooth scrolling function
         function smoothScrollTo(element, options = {}) {
             if (!element) return;
 
@@ -1575,16 +2122,13 @@
             };
 
             const scrollOptions = { ...defaultOptions, ...options };
-
-            // Get target position
             const targetRect = element.getBoundingClientRect();
             const startY = window.pageYOffset;
 
-            // Calculate target position based on block option
             let targetY;
             switch (scrollOptions.block) {
                 case 'start':
-                    targetY = targetRect.top + startY - 20; // 20px offset from top
+                    targetY = targetRect.top + startY - 20;
                     break;
                 case 'center':
                     targetY = targetRect.top + startY - (window.innerHeight / 2) + (targetRect.height / 2);
@@ -1600,7 +2144,6 @@
             const duration = scrollOptions.duration;
             let startTime = null;
 
-            // Enhanced easing functions
             const easingFunctions = {
                 easeInOutCubic: (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
                 easeOutQuart: (t) => 1 - (--t) * t * t * t,
@@ -1623,13 +2166,11 @@
                 }
             }
 
-            // Only animate if there's a significant distance to scroll
             if (Math.abs(distance) > 10) {
                 requestAnimationFrame(animate);
             }
         }
 
-        // Enhanced pagination with better scrolling
         function changeNewsPage(direction) {
             const { combined, page, perPage } = newsPagination;
             const totalPages = Math.ceil(combined.length / perPage);
@@ -1642,7 +2183,6 @@
 
             displayNewsPaginated();
 
-            // Smooth scroll to top of news content with proper timing
             setTimeout(() => {
                 const newsContentElement = document.getElementById('news-content');
                 if (newsContentElement) {
@@ -1652,10 +2192,9 @@
                         easing: 'easeOutQuart'
                     });
                 }
-            }, 50); // Small delay to ensure DOM is updated
+            }, 50);
         }
 
-        // Enhanced text expansion with smooth scrolling
         function toggleExpand(bodyId, button) {
             const bodyElement = document.getElementById(bodyId);
             const isCollapsed = bodyElement.classList.contains('collapsed');
@@ -1666,7 +2205,6 @@
             } else {
                 bodyElement.classList.add('collapsed');
                 button.innerHTML = 'Show more ▼';
-                // Smooth scroll to element after collapsing with proper delay
                 setTimeout(() => {
                     const targetElement = bodyElement.closest('.post-item') || bodyElement;
                     if (targetElement) {
@@ -1676,7 +2214,7 @@
                             easing: 'easeInOutQuart'
                         });
                     }
-                }, 350); // Longer delay to allow collapse animation
+                }, 350);
             }
         }
     </script>

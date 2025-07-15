@@ -17,7 +17,8 @@ from pyshortcuts import make_shortcut
 from webview.dom import ManipulationMode
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from news_grouper.api.app import create_app
+from news_grouper.api import create_app
+from news_grouper.api.config import Config
 
 
 def create_shortcut(event) -> None:
@@ -70,8 +71,19 @@ def bind(window: webview.Window) -> None:
     button.events.click += create_shortcut
 
 
-app = create_app()
+class DesktopConfig(Config):
+    """Configuration for the desktop application."""
+
+    pass
+
+
+app = create_app(DesktopConfig)
 # create_window url parameter also accepts wsgi app, but typing is not documented
 window = webview.create_window("News Grouper", app, maximized=True, text_select=True)  # type: ignore
 
-webview.start(bind, [window], icon="../api/static/icon.svg")
+webview.start(
+    bind,
+    [window],
+    icon="../api/static/icon.svg",
+    storage_path=os.path.join(os.path.dirname(__file__), "storage"),
+)

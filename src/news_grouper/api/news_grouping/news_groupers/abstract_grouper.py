@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from news_grouper.models.posts import Post, PostGroup
+from news_grouper.api.common.models import Post, PostGroup
 
 
 class NewsGrouper(ABC):

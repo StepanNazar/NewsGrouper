@@ -2,8 +2,8 @@ from datetime import datetime
 
 from bs4 import BeautifulSoup
 
-from news_grouper.models.posts import Post
-from news_grouper.news_parsers import RSSFeedParser
+from news_grouper.api.common.models import Post
+from news_grouper.api.news_sources.news_parsers import RSSFeedParser
 
 
 class TelegramRSSBridgeParser(RSSFeedParser):

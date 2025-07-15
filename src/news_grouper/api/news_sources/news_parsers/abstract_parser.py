@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from news_grouper.models.posts import Post
+from news_grouper.api.common.models import Post
 
 
 class NewsParser(ABC):

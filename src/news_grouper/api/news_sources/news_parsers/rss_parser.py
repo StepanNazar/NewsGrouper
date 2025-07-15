@@ -6,8 +6,8 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 
-from news_grouper.models.posts import Post
-from news_grouper.news_parsers.abstract_parser import NewsParser
+from news_grouper.api.common.models import Post
+from news_grouper.api.news_sources.news_parsers.abstract_parser import NewsParser
 
 
 class RSSFeedParser(NewsParser):
