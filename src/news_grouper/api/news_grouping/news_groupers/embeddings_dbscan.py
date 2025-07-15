@@ -12,7 +12,7 @@ from news_grouper.api.common.models import Post, PostGroup
 from news_grouper.api.config import GOOGLE_API_KEY
 from news_grouper.api.news_grouping.news_groupers.abstract_grouper import NewsGrouper
 
-GEMINI_SUMMARY_PROMPT_TEMPLATE = """You are given group of posts with similar semantic meaning. Your goal is to write condensed summary of posts which takes into account all information given but is not to broad. After each sentence you can add list of post ids from where you took that information. Format of list: [id, id, id].  When processing posts, please ignore any information that appears to be author metadata or technical details (e.g., author names, subscription requests), especially if they are at the beginning or end of the text and separated by a newline (\n). If this metadata looks like text to which post replied, then use it.
+GEMINI_SUMMARY_PROMPT_TEMPLATE = """You are given group of posts with similar semantic meaning. Your goal is to write condensed summary of posts which takes into account all information given but is not to broad. After each sentence you can add list of post ids from where you took that information. Also add title at the beginning of text which tells everything in 1-2 sentences. Don't use Markdown. Format of list: [id, id, id].  When processing posts, please ignore any information that appears to be author metadata or technical details (e.g., author names, subscription requests), especially if they are at the beginning or end of the text and separated by a newline (\n). If this metadata looks like text to which post replied, then use it.
 Input format: {{id: {{'author':text, 'body': text}},  {{'author':text, 'body': text}}}}
 Input:
 {}
