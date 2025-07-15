@@ -18,7 +18,7 @@ with Python, Flask, Gemini API, Scikit-learn and PyWebView.
 
 - **Backend**: Python, Flask, APIFlask, Flask-SQLAlchemy, Flask-Migrate
 - **Machine Learning**: DBSCAN clustering, Gemini text embeddings for semantic similarity
-- **Desktop**: PyWebView for native desktop experience and `pyshortcuts` for creating desktop shortcuts
+- **Desktop**: PyWebView for desktop app and `pyshortcuts` for creating desktop shortcuts
 - **Authentication**: JWT tokens with a refresh mechanism using `Flask-JWT-Extended` library
 - **News Parsing**: RSS feed processing using `feedparser` and `beautifulsoup4` libraries
 
