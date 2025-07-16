@@ -63,7 +63,7 @@ class EmbeddingsDBSCANGrouper(NewsGrouper):
         embeddings = []
         for post in posts:
             result = gemini_client.models.embed_content(
-                model="text-embedding-004",
+                model="gemini-embedding-001",
                 contents=post.body,
                 config=types.EmbedContentConfig(task_type="SEMANTIC_SIMILARITY"),
             )
