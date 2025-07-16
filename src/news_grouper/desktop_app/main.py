@@ -94,7 +94,8 @@ def bind(window: webview.Window) -> None:
         auth_tab.hide()
     logged_user_info = window.dom.get_element("#user-info")
     if logged_user_info:
-        logged_user_info.hide()
+        logged_user_info.style["position"] = "fixed"
+        logged_user_info.style["opacity"] = "0"
     button.events.click += create_shortcut
 
 
