@@ -35,7 +35,7 @@ def is_db_at_latest_migration():
     alembic_cfg = AlembicConfig(ALEMBIC_CONFIG_PATH)
     alembic_cfg.set_main_option("script_location", MIGRATIONS_DIR)
     script = ScriptDirectory.from_config(alembic_cfg)
-    with db.get_engine().connect() as connection:
+    with db.engine.connect() as connection:
         context = MigrationContext.configure(connection)
         current_rev = context.get_current_revision()
         latest_rev = script.get_current_head()
@@ -142,7 +142,7 @@ with app.app_context():
         upgrade(directory=MIGRATIONS_DIR)
 
     # ensure there is a user in the database
-    if not User.query.get(1):
+    if not db.session.get(User, 1):
         user = User(
             id=1,
             first_name="User",
