@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 
 from news_grouper.api.common.models import Post, PostGroup
+from news_grouper.api.config import GOOGLE_API_KEY
+from news_grouper.api.news_grouping.news_groupers.gemini import GeminiClient
 
 
 class NewsGrouper(ABC):
@@ -28,6 +30,7 @@ class NewsGrouper(ABC):
 
     name: str
     description: str
+    gemini_client: GeminiClient = GeminiClient(api_key=GOOGLE_API_KEY)
 
     def __init_subclass__(cls):
         for attr in ["name", "description"]:
@@ -39,13 +42,40 @@ class NewsGrouper(ABC):
                 f"Grouper name '{cls.name}' is not unique among subclasses"
             )
 
-    @staticmethod
-    @abstractmethod
-    def group_posts(posts: list[Post]) -> list[Post | PostGroup]:
+    @classmethod
+    def group_posts(cls, posts: list[Post]) -> list[Post | PostGroup]:
         """Group posts based on some criteria.
 
         :param posts: The list of posts to group.
         :return: A list of grouped posts.
+        """
+        groups = cls._get_groups(posts)
+        result = []
+        for group in groups.values():
+            if len(group) == 1:
+                result.append(posts[group[0]])
+            else:
+                grouped_posts = [posts[i] for i in group]
+                summary = cls.summarize_posts(grouped_posts)
+                result.append(PostGroup(posts=grouped_posts, summary=summary))
+        return result
+
+    @classmethod
+    def summarize_posts(cls, posts: list[Post]) -> str:
+        """Summarize a list of posts. The default implementation uses Gemini API.
+
+        :param posts: The list of posts to summarize.
+        :return: The summary of the posts.
+        """
+        return NewsGrouper.gemini_client.summarize_posts(posts)
+
+    @classmethod
+    @abstractmethod
+    def _get_groups(cls, posts: list[Post]) -> dict[int, list[int]]:
+        """Abstract method to get groups of posts.
+
+        :param posts: The list of posts to group.
+        :return: A dictionary where keys are group labels and values are lists of posts indices.
         """
         ...
 

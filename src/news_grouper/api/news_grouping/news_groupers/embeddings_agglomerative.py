@@ -1,20 +1,20 @@
 from collections import defaultdict
 
 import numpy as np
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics.pairwise import cosine_distances
 
 from news_grouper.api.common.models import Post
 from news_grouper.api.news_grouping.news_groupers.abstract_grouper import NewsGrouper
 
 
-class EmbeddingsDBSCANGrouper(NewsGrouper):
-    """Grouper that uses embeddings and DBSCAN to group posts."""
+class EmbeddingsAgglomerativeGrouper(NewsGrouper):
+    """Grouper that uses embeddings and Agglomerative Clustering to group posts."""
 
-    name = "Embeddings DBSCAN"
+    name = "Embeddings Agglomerative"
     description = (
-        "Better for grouping related news. Converts posts into embeddings using Gemini API, groups"
-        "them using DBSCAN and writes summaries using Gemini API."
+        "Better for grouping same news. Converts posts into embeddings using Gemini API, "
+        "groups them using DBSCAN and writes summaries using Gemini API."
     )
 
     @classmethod
@@ -28,7 +28,12 @@ class EmbeddingsDBSCANGrouper(NewsGrouper):
             [NewsGrouper.gemini_client.compute_embedding(post) for post in posts]
         )
         distance_matrix = cosine_distances(embeddings)
-        clustering = DBSCAN(eps=0.17, min_samples=1, metric="precomputed")
+        clustering = AgglomerativeClustering(
+            n_clusters=None,  # type: ignore
+            distance_threshold=0.17,
+            linkage="complete",
+            metric="precomputed",
+        )
         labels = clustering.fit_predict(distance_matrix)
 
         groups = defaultdict(list)
