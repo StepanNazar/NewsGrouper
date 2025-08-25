@@ -13,7 +13,7 @@ class GrouperOutSchema(Schema):
 class NewsInSchema(Schema):
     grouper = String(
         required=True,
-        validate=OneOf([parser.name for parser in NewsGrouper.get_all_groupers()]),
+        validate=OneOf([grouper.name for grouper in NewsGrouper.get_all_groupers()]),
     )
     from_datetime = String(required=True)
     to_datetime = String()
