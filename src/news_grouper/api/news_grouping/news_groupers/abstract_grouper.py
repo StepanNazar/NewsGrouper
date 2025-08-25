@@ -1,4 +1,6 @@
+import inspect
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 
 from news_grouper.api.common.models import Post, PostGroup
 from news_grouper.api.config import GOOGLE_API_KEY
@@ -33,6 +35,9 @@ class NewsGrouper(ABC):
     gemini_client: GeminiClient = GeminiClient(api_key=GOOGLE_API_KEY)
 
     def __init_subclass__(cls):
+        if inspect.isabstract(cls):
+            return
+
         for attr in ["name", "description"]:
             if not hasattr(cls, attr):
                 raise TypeError(f"{cls.__name__} must define class attribute '{attr}'")
@@ -51,13 +56,12 @@ class NewsGrouper(ABC):
         """
         groups = cls._get_groups(posts)
         result = []
-        for group in groups.values():
-            if len(group) == 1:
-                result.append(posts[group[0]])
+        for group_posts in groups:
+            if len(group_posts) == 1:
+                result.append(group_posts[0])
             else:
-                grouped_posts = [posts[i] for i in group]
-                summary = cls.summarize_posts(grouped_posts)
-                result.append(PostGroup(posts=grouped_posts, summary=summary))
+                summary = cls.summarize_posts(group_posts)
+                result.append(PostGroup(posts=group_posts, summary=summary))
         return result
 
     @classmethod
@@ -71,11 +75,11 @@ class NewsGrouper(ABC):
 
     @classmethod
     @abstractmethod
-    def _get_groups(cls, posts: list[Post]) -> dict[int, list[int]]:
+    def _get_groups(cls, posts: list[Post]) -> Iterable[list[Post]]:
         """Abstract method to get groups of posts.
 
         :param posts: The list of posts to group.
-        :return: A dictionary where keys are group labels and values are lists of posts indices.
+        :return: A list of groups, where each group is a list of posts.
         """
         ...
 
@@ -89,7 +93,8 @@ class NewsGrouper(ABC):
         def collect_subclasses(base_class):
             result = []
             for subclass in base_class.__subclasses__():
-                result.append(subclass)
+                if not inspect.isabstract(subclass):
+                    result.append(subclass)
                 result.extend(collect_subclasses(subclass))
             return result
 

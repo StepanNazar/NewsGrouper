@@ -1,9 +1,18 @@
 import json
 import logging
+from typing import Callable
 
-import numpy as np
 from google import genai
+from google.genai import errors as genai_errors
 from google.genai import types
+from tenacity import (
+    RetryError,
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_fixed,
+)
 
 from news_grouper.api.common.models import Post
 
@@ -15,10 +24,58 @@ GEMINI_SUMMARY_PROMPT_TEMPLATE = (
     "please ignore any information that appears to be author metadata or technical details (e.g., author names, "
     "subscription requests), especially if they are at the beginning or end of the text and separated by a newline "
     "(\\n). If this metadata looks like text to which post replied, then use it."
-    "\nInput format: {{id: {{'author':text, 'body': text}},  {{'author':text, 'body': text}}}}"
+    "\nInput format: {{id: {{'author': text, 'body': text}},  {{'author': text, 'body': text}}}}"
     "\nInput:"
     "\n{}"
 )
+SUMMARY_MODEL = "gemini-2.5-flash-lite-preview-06-17"
+TOP_P = 0.5
+TEMPERATURE = 0.5
+THINKING_BUDGET = 0
+
+EMBEDDING_MODEL = "gemini-embedding-001"
+EMBEDDING_TASK_TYPE = "SEMANTIC_SIMILARITY"
+EMBEDDING_LENGTH = 3072
+
+RETRY_WAIT_SECONDS = 2
+RETRY_ATTEMPTS = 5
+
+logger = logging.getLogger(__name__)
+
+
+def _retry_decorator(
+    wait_seconds: int = RETRY_WAIT_SECONDS, attempts: int = RETRY_ATTEMPTS
+) -> Callable:
+    return retry(
+        retry=retry_if_exception_type((genai_errors.ClientError, GeminiResponseError)),
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+        wait=wait_fixed(wait_seconds),
+        stop=stop_after_attempt(attempts),
+    )
+
+
+def _create_summarization_prompt(posts: list[Post]) -> str:
+    """Create a prompt for summarizing posts."""
+    prompt_input = {
+        i + 1: {"author": post.author, "body": post.body}
+        for i, post in enumerate(posts)
+    }
+    prompt = GEMINI_SUMMARY_PROMPT_TEMPLATE.format(
+        json.dumps(prompt_input, ensure_ascii=False)
+    )
+    return prompt
+
+
+class GeminiResponseError(Exception):
+    """Custom exception for Gemini API response errors."""
+
+
+class GeminiEmptyTextError(GeminiResponseError):
+    """Exception raised when generated text is empty."""
+
+
+class GeminiEmptyEmbeddingError(GeminiResponseError):
+    """Exception raised when returned embedding is empty."""
 
 
 class GeminiClient:
@@ -31,40 +88,49 @@ class GeminiClient:
         :param posts: The list of posts to summarize.
         :return: The summary of the posts.
         """
+        prompt = _create_summarization_prompt(posts)
+        try:
+            return self._generate_content_with_retry(prompt)
+        except RetryError as e:
+            logger.error("Failed to generate summary after retries: %s", e)
+            return "Failed to generate summary."
 
-        prompt_input = {
-            i + 1: {"author": post.author, "body": post.body}
-            for i, post in enumerate(posts)
-        }
-        prompt = GEMINI_SUMMARY_PROMPT_TEMPLATE.format(
-            json.dumps(prompt_input, ensure_ascii=False)
-        )
+    @_retry_decorator()
+    def _generate_content_with_retry(self, prompt: str) -> str:
+        """Generate content using Gemini API with retry logic."""
         response = self.gemini_client.models.generate_content(
-            model="gemini-2.5-flash-lite-preview-06-17",
+            model=SUMMARY_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-                temperature=0.5,
-                top_p=0.5,
+                thinking_config=types.ThinkingConfig(thinking_budget=THINKING_BUDGET),
+                temperature=TEMPERATURE,
+                top_p=TOP_P,
             ),
         )
-        return response.text or "Failed to summarize posts."
+        if response.text is None:
+            raise GeminiEmptyTextError("Empty response text")
+        return response.text
 
-    def compute_embedding(self, post: Post) -> list[float]:
+    def compute_embedding(self, post: Post) -> list[float] | None:
         """Compute the embedding for post using Gemini API.
 
         :param post: The post to compute embedding for.
-        :return: The embedding of the post.
+        :return: The embedding of the post or None if failed.
         """
-        result = self.gemini_client.models.embed_content(
-            model="gemini-embedding-001",
-            contents=post.body,
-            config=types.EmbedContentConfig(task_type="SEMANTIC_SIMILARITY"),
+        try:
+            return self._embed_content_with_retry(post.body)
+        except RetryError as e:
+            logger.error("Failed to compute embedding after retries: %s", e)
+            return None
+
+    @_retry_decorator()
+    def _embed_content_with_retry(self, content: str) -> list[float]:
+        """Compute the embedding for content using Gemini API with retry logic."""
+        response = self.gemini_client.models.embed_content(
+            model=EMBEDDING_MODEL,
+            contents=content,
+            config=types.EmbedContentConfig(task_type=EMBEDDING_TASK_TYPE),
         )
-        if not result.embeddings or not result.embeddings[0].values:
-            logging.error(
-                f"Failed to compute embedding for post: {post.title}. Generating random embedding."
-            )
-            length = 3072
-            return np.random.rand(length).tolist()
-        return result.embeddings[0].values
+        if not response.embeddings or not response.embeddings[0].values:
+            raise GeminiEmptyEmbeddingError("Empty embeddings in response")
+        return response.embeddings[0].values
