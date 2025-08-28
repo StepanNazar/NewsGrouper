@@ -94,6 +94,7 @@ class SubclassRegistrar[T]:
 
     @classmethod
     def _register_base_class(cls):
+        """Register the base class and its required attributes."""
         required_attrs = list(set(cls.__annotations__) - set(cls.__dict__))
         if "name" not in required_attrs:
             required_attrs.append("name")
@@ -103,11 +104,13 @@ class SubclassRegistrar[T]:
         )
 
     @staticmethod
-    def _is_base_class(class_):
+    def _is_base_class(class_) -> bool:
+        """Check if the class is a direct subclass of SubclassRegistrar."""
         return SubclassRegistrar in class_.__bases__
 
     @classmethod
     def _validate_and_register_subclass(cls):
+        """Check required attributes, name uniqueness, and register the subclass."""
         base_class_config = cls._get_base_class_config()
         for attr in base_class_config.required_attrs:
             cls._require_attr(attr)
@@ -120,6 +123,7 @@ class SubclassRegistrar[T]:
 
     @classmethod
     def _get_base_class_config(cls) -> BaseClassConfig:
+        """Get the BaseClassConfig for the base class of this subclass."""
         for parent in cls.__mro__:
             if SubclassRegistrar._is_base_class(parent):
                 return SubclassRegistrar._base_classes_config[parent]
@@ -129,6 +133,7 @@ class SubclassRegistrar[T]:
 
     @classmethod
     def _require_attr(cls, attr: str):
+        """Ensure that the class has the specified attribute."""
         if not hasattr(cls, attr):
             raise TypeError(f"{cls.__name__} must define class attribute '{attr}'")
 
