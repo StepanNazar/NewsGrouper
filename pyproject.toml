@@ -1,8 +1,12 @@
+[tool.pytest.ini_options]
+pythonpath = "src"
+
+[tool.ruff]
 extend-exclude = [
     "migrations",
 ]
 
-[lint]
+[tool.ruff.lint]
 
 extend-select = [
     "W",        # PyCodeStyle warnings
