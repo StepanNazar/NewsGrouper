@@ -26,12 +26,12 @@ authorizations = {
 
 def register_blueprints(app: APIFlask) -> None:
     from news_grouper.api.auth.routes import auth
-    from news_grouper.api.main.routes import main
+    from news_grouper.api.main_page.routes import main_page
     from news_grouper.api.news_grouping.routes import grouping
     from news_grouper.api.news_sources.routes import sources
     from news_grouper.api.profiles.routes import profiles
 
-    app.register_blueprint(main)
+    app.register_blueprint(main_page)
     app.register_blueprint(auth)
     app.register_blueprint(sources)
     app.register_blueprint(grouping)

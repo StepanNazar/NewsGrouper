@@ -40,7 +40,7 @@ def get_profiles(query_data):
 @profiles.post("/profiles")
 @jwt_required()
 @profiles.input(ProfileInSchema)
-@profiles.output(ProfileInSchema, status_code=201, headers=LocationHeader)
+@profiles.output(ProfileOutSchema, status_code=201, headers=LocationHeader)
 @profiles.doc(security=["jwt_access_token"])
 def create_profile(json_data):
     """Create a new profile"""

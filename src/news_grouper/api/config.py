@@ -25,18 +25,21 @@ class Config:
     JWT_TOKEN_LOCATION = ("cookies", "headers")
     # path to which cookies are sent
     JWT_REFRESH_COOKIE_PATH = "/api/refresh"
+    JWT_REFRESH_CSRF_COOKIE_PATH = "/api/refresh"
+    JWT_COOKIE_SECURE = True
 
 
 class DevConfig(Config):
     # DEBUG = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "app.db")
     SQLALCHEMY_ECHO = True
+    JWT_COOKIE_SECURE = False
 
 
 class TestConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "test.db")
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
 class ProdConfig(Config):
-    JWT_COOKIE_SECURE = True
+    pass
