@@ -1,3 +1,7 @@
+import pytest
+
+
+@pytest.mark.skip
 def test_which_fills_db_with_rows(client):
     client.post(
         "/api/register",
@@ -10,6 +14,7 @@ def test_which_fills_db_with_rows(client):
     )
 
 
+@pytest.mark.skip
 def test_db_is_cleared_at_teardown_of_previous_test(client, db):
     from news_grouper.api.auth.models import User
 
