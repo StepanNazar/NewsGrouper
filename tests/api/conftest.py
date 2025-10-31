@@ -42,9 +42,49 @@ def client(app, db):
     return app.test_client()
 
 
+class AuthenticatedClient:
+    def __init__(self, client, first_name, last_name, email, password):
+        self.client = client
+        response = client.post(
+            "/api/register",
+            json={
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "password": password,
+            },
+        )
+        self.access_token = response.json["access_token"]
+
+    def add_auth_header(self, kwargs):
+        headers = kwargs.get("headers", {})
+        headers["Authorization"] = f"Bearer {self.access_token}"
+        kwargs["headers"] = headers
+
+    def get(self, *args, **kwargs):
+        self.add_auth_header(kwargs)
+        return self.client.get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        self.add_auth_header(kwargs)
+        return self.client.post(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        self.add_auth_header(kwargs)
+        return self.client.put(*args, **kwargs)
+
+    def patch(self, *args, **kwargs):
+        self.add_auth_header(kwargs)
+        return self.client.patch(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.add_auth_header(kwargs)
+        return self.client.delete(*args, **kwargs)
+
+
 @pytest.fixture
-def authenticated_client(client):
-    return make_authenticated_client(
+def authenticated_client(client) -> AuthenticatedClient:
+    return AuthenticatedClient(
         client,
         first_name="John",
         last_name="Doe",
@@ -54,32 +94,11 @@ def authenticated_client(client):
 
 
 @pytest.fixture
-def authenticated_client2(client):
-    return make_authenticated_client(
+def authenticated_client2(client) -> AuthenticatedClient:
+    return AuthenticatedClient(
         client,
         first_name="Test",
         last_name="User",
         email="test.user@test.com",
         password="TestPassw0rd!",  # noqa: S106
     )
-
-
-def make_authenticated_client(client, first_name, last_name, email, password):
-    response = client.post(
-        "/api/register",
-        json={
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "password": password,
-        },
-    )
-    access_token = response.json["access_token"]
-
-    def make_request(method, url, **kwargs):
-        headers = kwargs.get("headers", {})
-        headers["Authorization"] = f"Bearer {access_token}"
-        kwargs["headers"] = headers
-        return getattr(client, method.lower())(url, **kwargs)
-
-    return make_request
