@@ -14,6 +14,7 @@ class NewsInSchema(Schema):
     grouper = String(
         required=True,
         validate=OneOf([grouper.name for grouper in NewsGrouper.get_all_groupers()]),
+        metadata={"enum": [grouper.name for grouper in NewsGrouper.get_all_groupers()]},
     )
     from_datetime = String(required=True)
     to_datetime = String()
