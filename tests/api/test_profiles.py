@@ -4,8 +4,8 @@ from types import MappingProxyType
 
 import pytest
 
-profile_data = MappingProxyType(
-    {  # immutable dict view to ensure test isolation
+profile_data = MappingProxyType(  # immutable dict view to ensure test isolation
+    {
         "name": "Test Profile",
         "description": "This is a test profile",
     }
@@ -26,7 +26,7 @@ def profile(authenticated_client):
 @pytest.fixture
 def cross_user_profiles(authenticated_client, authenticated_client2):
     """Creates profiles for two different users."""
-    return (create_profile(authenticated_client), create_profile(authenticated_client2))
+    return create_profile(authenticated_client), create_profile(authenticated_client2)
 
 
 def test_post_profile(authenticated_client):
@@ -70,20 +70,25 @@ def test_get_profiles(authenticated_client):
     profiles = []
     for i in range(3):
         new_profile = profile_data.copy()
-        new_profile["name"] = f"Profile {i + 1}"
+        new_profile["name"] = f"Profile {3 - i}"
         profiles.append(new_profile)
     for new_profile in profiles:
         create_profile(authenticated_client, new_profile)
 
     response = authenticated_client.get("/api/profiles?order=asc")
 
-    assert response.status_code == 200
-    assert "items" in response.json
-    assert len(response.json["items"]) == 3
-    for i, expected_profile in enumerate(profiles):
-        returned_profile = response.json["items"][i]
-        for key, value in expected_profile.items():
-            assert returned_profile[key] == value
+    assert_pagination_response(response, total=3, page=1, total_pages=1, items_count=3)
+    assert_profiles_order_match(response.json["items"], profiles)
+
+    response = authenticated_client.get("/api/profiles?sort_by=name")
+
+    assert_pagination_response(response, total=3, page=1, total_pages=1, items_count=3)
+    assert_profiles_order_match(response.json["items"], profiles)
+
+    response = authenticated_client.get("/api/profiles?per_page=2&page=2")
+
+    assert_pagination_response(response, total=3, page=2, total_pages=2, items_count=1)
+    assert_profiles_order_match(response.json["items"], [profiles[0]])
 
 
 @pytest.mark.parametrize(
@@ -150,9 +155,7 @@ def test_profile_not_found(authenticated_client, method, payload):
 
 
 def test_get_with_huge_id(authenticated_client):
-    response = authenticated_client.get(
-        f"/api/profiles/{int(uuid.uuid4().hex, 16)}"
-    )  # breaks sqlite
+    response = authenticated_client.get(f"/api/profiles/{int(uuid.uuid4().hex, 16)}")
 
     assert response.status_code == 404
 
@@ -185,3 +188,20 @@ def assert_response_matches_profile(response, profile):
     assert "id" in response.json
     assert "created" in response.json
     assert "updated" in response.json
+
+
+def assert_pagination_response(response, total, page, total_pages, items_count):
+    """Verify pagination metadata."""
+    assert response.status_code == 200
+    assert "items" in response.json
+    assert response.json["total_items"] == total
+    assert response.json["total_pages"] == total_pages
+    assert response.json["page"] == page
+    assert len(response.json["items"]) == items_count
+
+
+def assert_profiles_order_match(returned_profiles, expected_profiles):
+    """Verify returned profiles match expected profiles."""
+    for i, expected_profile in enumerate(expected_profiles):
+        for key, value in expected_profile.items():
+            assert returned_profiles[i][key] == value
