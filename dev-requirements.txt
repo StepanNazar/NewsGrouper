@@ -1,6 +1,7 @@
-ruff~=0.12.2
-pyright~=1.1.402
-pre_commit~=4.2.0
-commitizen~=4.8.3
-pytest~=8.4.2
-pytest-cov~=7.0.0
+ruff==0.12.2
+pyright==1.1.402
+pre_commit==4.2.0
+commitizen==4.8.3
+pytest==8.4.2
+pytest-cov==7.0.0
+pytest-mock==3.15.1
