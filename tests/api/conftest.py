@@ -1,8 +1,13 @@
+from datetime import UTC, datetime
+from types import MappingProxyType
+
 import pytest
 
 from news_grouper.api import create_app
 from news_grouper.api import db as _db
+from news_grouper.api.common.models import Post
 from news_grouper.api.config import TestConfig
+from news_grouper.api.news_sources.news_parsers import NewsParser
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -102,3 +107,115 @@ def authenticated_client2(client) -> AuthenticatedClient:
         email="test.user@test.com",
         password="TestPassw0rd!",  # noqa: S106
     )
+
+
+def assert_pagination_response(response, total, page, total_pages, items_count):
+    """Verify pagination metadata."""
+    assert response.status_code == 200
+    assert "items" in response.json
+    assert response.json["total_items"] == total
+    assert response.json["total_pages"] == total_pages
+    assert response.json["page"] == page
+    assert len(response.json["items"]) == items_count
+
+
+def assert_resources_order_match(returned_resources, expected_resources):
+    """Verify returned resources match expected resources."""
+    for i, expected_source in enumerate(expected_resources):
+        for key, value in expected_source.items():
+            assert returned_resources[i][key] == value
+
+
+def assert_response_matches_resource(response, resource_data, additional_keys=None):
+    """Asserts that the response matches the resource data and has additional keys."""
+    for key, value in resource_data.items():
+        assert response.json[key] == value
+    if additional_keys:
+        for key in additional_keys:
+            assert key in response.json
+
+
+profile_data = MappingProxyType(  # immutable dict view to ensure test isolation
+    {
+        "name": "Test Profile",
+        "description": "This is a test profile",
+    }
+)
+updated_profile_data = MappingProxyType(
+    {
+        "name": "Updated Profile",
+        "description": "This is a test profile",
+    }
+)
+source_data = MappingProxyType(
+    {
+        "name": "Test Source",
+        "parser_name": "mock_parser",
+        "link": "https://example.com/feed",
+    }
+)
+updated_source_data = MappingProxyType(
+    {
+        "name": "Updated Source",
+        "parser_name": "mock_parser",
+        "link": "https://example.com/feed",
+    }
+)
+
+
+def create_profile(client, profile_data: dict | MappingProxyType = profile_data):
+    response = client.post("/api/profiles", json=profile_data.copy())
+    return response.headers["Location"]
+
+
+@pytest.fixture
+def profile(authenticated_client):
+    """Sets up a test case with a profile with profile_data. Returns the profile's url."""
+    return create_profile(authenticated_client)
+
+
+def create_source(
+    client, profile_url, source_data: dict | MappingProxyType = source_data
+):
+    """Helper to create a source."""
+    profile_id = profile_url.rsplit("/", maxsplit=1)[1]
+    response = client.post(
+        f"/api/profiles/{profile_id}/sources", json=source_data.copy()
+    )
+    return response.headers["Location"]
+
+
+@pytest.fixture
+def source(authenticated_client, profile):
+    """Sets up a test case with a source. Returns the source's url."""
+    return create_source(authenticated_client, profile)
+
+
+class MockParser(NewsParser):
+    name = "mock_parser"
+    description = "Mock parser"
+    link_hint = "https://example.com"
+
+    @classmethod
+    def get_posts(
+        cls, link: str, from_datetime: datetime, to_datetime: datetime | None
+    ) -> list[Post]:
+        return [
+            Post(
+                title="Test Post",
+                link="https://example.com/post",
+                body="Test body",
+                author="Test Author",
+                published_time=datetime.now(tz=UTC),
+            )
+        ]
+
+    @classmethod
+    def check_source_link(cls, link: str) -> bool:
+        return link != "https://invalid.com"
+
+
+class MockParser2(MockParser):
+    name = "mock_parser2"
+    description = "Mock parser"
+    link_hint = "https://example.com"
