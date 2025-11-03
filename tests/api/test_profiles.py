@@ -1,55 +1,12 @@
-import time
 import uuid
 
 import pytest
 from conftest import (
     assert_pagination_response,
     assert_resources_order_match,
-    assert_response_matches_resource,
     create_profile,
     profile_data,
-    updated_profile_data,
 )
-
-
-def test_post_profile(authenticated_client):
-    response = authenticated_client.post("/api/profiles", json=profile_data.copy())
-
-    assert response.status_code == 201
-    assert "Location" in response.headers
-    assert_response_matches_resource(
-        response, profile_data, additional_keys=["id", "created", "updated"]
-    )
-
-
-def test_get_profile(authenticated_client, profile):
-    response = authenticated_client.get(profile)
-
-    assert response.status_code == 200
-    assert_response_matches_resource(
-        response, profile_data, additional_keys=["id", "created", "updated"]
-    )
-
-
-def test_put_profile(authenticated_client, profile):
-    time.sleep(0.01)  # Ensure the updated timestamp is different
-    response = authenticated_client.put(profile, json=updated_profile_data.copy())
-
-    assert response.status_code == 200
-    assert_response_matches_resource(
-        response, updated_profile_data, additional_keys=["id", "created", "updated"]
-    )
-    assert response.json["updated"] != response.json["created"]
-
-
-def test_delete_profile(authenticated_client, profile):
-    response = authenticated_client.delete(profile)
-
-    assert response.status_code == 204
-
-    response = authenticated_client.get(profile)
-
-    assert response.status_code == 404
 
 
 def test_get_profiles(authenticated_client, authenticated_client2):

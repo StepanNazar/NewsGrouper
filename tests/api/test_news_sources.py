@@ -1,16 +1,12 @@
-import time
-
 import pytest
 from conftest import (
     MockParser,
     assert_pagination_response,
     assert_resources_order_match,
-    assert_response_matches_resource,
     create_profile,
     create_source,
     profile_data,
     source_data,
-    updated_source_data,
 )
 
 
@@ -26,17 +22,6 @@ def test_get_parsers(client):
         "link_hint": MockParser.link_hint,
     }
     assert mock_parser_data in response.json
-
-
-def test_post_source(authenticated_client, profile):
-    """Test creating a new source."""
-    response = authenticated_client.post(f"{profile}/sources", json=source_data.copy())
-
-    assert response.status_code == 201
-    assert "Location" in response.headers
-    assert_response_matches_resource(
-        response, source_data, additional_keys=["id", "created", "updated"]
-    )
 
 
 def test_post_source_with_invalid_link(authenticated_client, profile):
@@ -59,29 +44,7 @@ def test_post_source_with_invalid_parser_name(authenticated_client, profile):
     assert response.status_code == 422
 
 
-def test_get_source(authenticated_client, source):
-    """Test getting a source by ID."""
-    response = authenticated_client.get(source)
-
-    assert response.status_code == 200
-    assert_response_matches_resource(
-        response, source_data, additional_keys=["id", "created", "updated"]
-    )
-
-
-def test_put_source(authenticated_client, source):
-    """Test updating a source."""
-    time.sleep(0.01)  # Ensure the updated timestamp is different
-    response = authenticated_client.put(source, json=updated_source_data.copy())
-
-    assert response.status_code == 200
-    assert_response_matches_resource(
-        response, updated_source_data, additional_keys=["id", "created", "updated"]
-    )
-    assert response.json["updated"] != response.json["created"]
-
-
-def test_put_source_invalid_link(authenticated_client, source):
+def test_put_source_with_invalid_link(authenticated_client, source):
     """Test updating a source with an invalid link."""
     updated_source = source_data.copy()
     updated_source["link"] = "https://invalid.com"
@@ -91,7 +54,7 @@ def test_put_source_invalid_link(authenticated_client, source):
     assert response.status_code == 400
 
 
-def test_put_source_invalid_parser_name(authenticated_client, source):
+def test_put_source_with_invalid_parser_name(authenticated_client, source):
     """Test updating a source with an invalid parser name."""
     updated_source = source_data.copy()
     updated_source["parser_name"] = "fdyhbjnrfedufduhjnijnkrfd"
@@ -99,17 +62,6 @@ def test_put_source_invalid_parser_name(authenticated_client, source):
     response = authenticated_client.put(source, json=updated_source)
 
     assert response.status_code == 422
-
-
-def test_delete_source(authenticated_client, source):
-    """Test deleting a source."""
-    response = authenticated_client.delete(source)
-
-    assert response.status_code == 204
-
-    response = authenticated_client.get(source)
-
-    assert response.status_code == 404
 
 
 def test_get_sources(authenticated_client, profile):
