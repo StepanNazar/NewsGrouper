@@ -3,7 +3,6 @@ from flask import url_for
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from news_grouper.api import db
-from news_grouper.api.auth.models import User
 from news_grouper.api.common.routes import create_pagination_response
 from news_grouper.api.common.schemas import (
     LocationHeader,
@@ -88,7 +87,7 @@ def create_source(profile_id, json_data):
 def get_source(source_id):
     """Get a source by ID"""
     user_id = get_jwt_identity()
-    return NewsSource.query.filter_by(id=source_id, user_id=user_id).first_or_404()
+    return NewsSource.query_users_source(user_id, source_id).first_or_404()
 
 
 @sources.put("/sources/<int:source_id>")
@@ -101,12 +100,7 @@ def get_source(source_id):
 def update_source(source_id, json_data):
     """Update a source in the current profile"""
     user_id = get_jwt_identity()
-    source = (
-        NewsSource.query.join(NewsSource.profile)
-        .join(Profile.user)
-        .filter(NewsSource.id == source_id, User.id == user_id)
-        .first_or_404()
-    )
+    source = NewsSource.query_users_source(user_id, source_id).first_or_404()
     parser = NewsParser.get_parser_by_name(json_data["parser_name"])
     if not parser.check_source_link(json_data["link"]):
         abort(400, message="Invalid link for this parser")
@@ -122,7 +116,7 @@ def update_source(source_id, json_data):
 def delete_source(source_id):
     """Delete a source from the current profile"""
     user_id = get_jwt_identity()
-    source = NewsSource.query.filter_by(id=source_id, user_id=user_id).first_or_404()
+    source = NewsSource.query_users_source(user_id, source_id).first_or_404()
     db.session.delete(source)
     db.session.commit()
     return {}, 204

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
+from flask_sqlalchemy.query import Query
 from sqlalchemy import orm as so
 
 from news_grouper.api import db
@@ -36,3 +37,7 @@ class NewsSource(TimestampMixin, db.Model):
         if not issubclass(parser, NewsParser):
             raise ValueError("Parser must be a subclass of NewsParser")
         self.parser_name = parser.name
+
+    @classmethod
+    def query_users_source(cls, user_id: int, source_id: int) -> Query:
+        return cls.query.filter(cls.profile.has(user_id=user_id), cls.id == source_id)
