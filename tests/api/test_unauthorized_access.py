@@ -9,6 +9,8 @@ from conftest import (
     updated_source_data,
 )
 
+from tests.api.conftest import lf
+
 
 @pytest.fixture
 def cross_user_profiles(authenticated_client, authenticated_client2):
@@ -57,27 +59,24 @@ def test_unauthorized_access(client, method, url, payload):
 
 
 @pytest.mark.parametrize(
-    "method,payload,cross_user_fixture",
+    "method,payload,cross_user_resources",
     [
-        ("get", None, "cross_user_profiles"),
-        ("put", updated_profile_data.copy(), "cross_user_profiles"),
-        ("delete", None, "cross_user_profiles"),
-        ("get", None, "cross_user_sources"),
-        ("put", updated_source_data.copy(), "cross_user_sources"),
-        ("delete", None, "cross_user_sources"),
+        ("get", None, lf(cross_user_profiles)),
+        ("put", updated_profile_data.copy(), lf(cross_user_profiles)),
+        ("delete", None, lf(cross_user_profiles)),
+        ("get", None, lf(cross_user_sources)),
+        ("put", updated_source_data.copy(), lf(cross_user_sources)),
+        ("delete", None, lf(cross_user_sources)),
     ],
 )
 def test_access_unowned_profile(
     authenticated_client,
     authenticated_client2,
-    cross_user_fixture,
+    cross_user_resources,
     method,
     payload,
-    request,
 ):
-    client_resource, client2_resource, original_resource_data = request.getfixturevalue(
-        cross_user_fixture
-    )
+    client_resource, client2_resource, original_resource_data = cross_user_resources
 
     response = getattr(authenticated_client2, method)(client_resource, json=payload)
 

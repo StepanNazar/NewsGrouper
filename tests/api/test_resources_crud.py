@@ -3,7 +3,10 @@ import time
 import pytest
 from conftest import (
     assert_response_matches_resource,
+    lf,
+    profile,
     profile_data,
+    source,
     source_data,
     updated_profile_data,
     updated_source_data,
@@ -16,18 +19,16 @@ def base_api_path():
 
 
 @pytest.mark.parametrize(
-    "resource_parent_fixture,resource_name,resource_data",
+    "resource_parent,resource_name,resource_data",
     [
-        ("base_api_path", "profiles", profile_data),
-        ("profile", "sources", source_data),
+        (lf(base_api_path), "profiles", profile_data),
+        (lf(profile), "sources", source_data),
     ],
 )
 def test_post_resource(
-    authenticated_client, resource_parent_fixture, resource_name, resource_data, request
+    authenticated_client, resource_parent, resource_name, resource_data
 ):
     """General test case for testing creation of any resource."""
-    resource_parent = request.getfixturevalue(resource_parent_fixture)
-
     response = authenticated_client.post(
         f"{resource_parent}/{resource_name}", json=resource_data.copy()
     )
@@ -40,16 +41,14 @@ def test_post_resource(
 
 
 @pytest.mark.parametrize(
-    "resource_fixture,resource_data",
+    "resource,resource_data",
     [
-        ("profile", profile_data),
-        ("source", source_data),
+        (lf(profile), profile_data),
+        (lf(source), source_data),
     ],
 )
-def test_get_resource(authenticated_client, resource_fixture, resource_data, request):
+def test_get_resource(authenticated_client, resource, resource_data):
     """General test case for testing reading of any resource."""
-    resource = request.getfixturevalue(resource_fixture)
-
     response = authenticated_client.get(resource)
 
     assert response.status_code == 200
@@ -59,18 +58,14 @@ def test_get_resource(authenticated_client, resource_fixture, resource_data, req
 
 
 @pytest.mark.parametrize(
-    "resource_fixture,updated_resource_data",
+    "resource,updated_resource_data",
     [
-        ("profile", updated_profile_data),
-        ("source", updated_source_data),
+        (lf(profile), updated_profile_data),
+        (lf(source), updated_source_data),
     ],
 )
-def test_put_resource(
-    authenticated_client, resource_fixture, updated_resource_data, request
-):
+def test_put_resource(authenticated_client, resource, updated_resource_data):
     """General test case for testing updating of any resource."""
-    resource = request.getfixturevalue(resource_fixture)
-
     time.sleep(0.01)  # Ensure the updated timestamp is different
     response = authenticated_client.put(resource, json=updated_resource_data.copy())
 
@@ -82,13 +77,11 @@ def test_put_resource(
 
 
 @pytest.mark.parametrize(
-    "resource_fixture",
-    ["profile", "source"],
+    "resource",
+    [lf(profile), lf(source)],
 )
-def test_delete_resource(authenticated_client, resource_fixture, request):
+def test_delete_resource(authenticated_client, resource):
     """General test case for testing deletion of any resource."""
-    resource = request.getfixturevalue(resource_fixture)
-
     response = authenticated_client.delete(resource)
 
     assert response.status_code == 204

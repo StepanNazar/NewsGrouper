@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from types import MappingProxyType
 
 import pytest
+from pytest_lazy_fixtures import lf as _lf
 
 from news_grouper.api import create_app
 from news_grouper.api import db as _db
@@ -107,6 +108,12 @@ def authenticated_client2(client) -> AuthenticatedClient:
         email="test.user@test.com",
         password="TestPassw0rd!",  # noqa: S106
     )
+
+
+def lf(fixture):
+    """Converts a fixture to a lazy fixture which can be used in parametrize."""
+    fixture_name = fixture.__name__
+    return _lf(fixture_name)
 
 
 def assert_pagination_response(response, total, page, total_pages, items_count):
