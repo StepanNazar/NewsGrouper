@@ -5,8 +5,13 @@ Revises: 8711b4aa4670
 Create Date: 2025-11-13 15:59:01.703119
 
 """
+import os
+
 from alembic import op
 import sqlalchemy as sa
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # revision identifiers, used by Alembic.
@@ -24,7 +29,8 @@ def upgrade():
     # ### end Alembic commands ###
 
     # Optionally generate API keys for existing users here
-    op.execute("UPDATE user SET api_key = '<default_value>' WHERE api_key IS NULL")
+    user_table = sa.Table('user', sa.MetaData(), autoload_with=op.get_bind())
+    op.execute(user_table.update().where(user_table.c.api_key.is_(None)).values(api_key=os.environ["GOOGLE_API_KEY"]))
 
     # Make the column non-nullable after populating it
     with op.batch_alter_table('user', schema=None) as batch_op:
