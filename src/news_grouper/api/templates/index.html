@@ -908,6 +908,11 @@
                         <label for="register-password">Password:</label>
                         <input type="password" id="register-password" required>
                     </div>
+                    <div class="form-group">
+                        <label for="register-api-key">Gemini API Key:</label>
+                        <input type="text" id="register-api-key" required>
+                        <small>Отримати можна <a href="https://aistudio.google.com/apikey" target="_blank">тут</a>. Інструкція <a href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank">тут</a>.</small>
+                    </div>
                     <button type="submit">Register</button>
                     <p><a href="#" id="show-login">Already have an account? Login</a></p>
                 </form>
@@ -975,6 +980,11 @@
                                 <div class="form-group">
                                     <label for="main-register-email">Email:</label>
                                     <input type="email" id="main-register-email" required>
+                                <div class="form-group">
+                                    <label for="main-register-api-key">Gemini API Key:</label>
+                                    <input type="text" id="main-register-api-key" required>
+                                    <small>You can get it <a href="https://aistudio.google.com/apikey" target="_blank">here</a>. Instruction is <a href="https://www.youtube.com/watch?v=6BRyynZkvf0" target="_blank">here</a>.</small>
+                                </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="main-register-password">Password:</label>
@@ -1423,7 +1433,8 @@
             const lastName = document.getElementById('register-last-name').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
-            await performRegister(firstName, lastName, email, password);
+            const apiKey = document.getElementById('register-api-key').value;
+            await performRegister(firstName, lastName, email, password, apiKey);
         }
 
         async function handleMainRegister(e) {
@@ -1432,10 +1443,11 @@
             const lastName = document.getElementById('main-register-last-name').value;
             const email = document.getElementById('main-register-email').value;
             const password = document.getElementById('main-register-password').value;
-            await performRegister(firstName, lastName, email, password);
+            const apiKey = document.getElementById('main-register-api-key').value;
+            await performRegister(firstName, lastName, email, password, apiKey);
         }
 
-        async function performRegister(firstName, lastName, email, password) {
+        async function performRegister(firstName, lastName, email, password, apiKey) {
             try {
                 const response = await fetch('/api/register', {
                     method: 'POST',
@@ -1446,7 +1458,8 @@
                         first_name: firstName,
                         last_name: lastName,
                         email,
-                        password
+                        password,
+                        gemini_api_key: apiKey
                     })
                 });
 
@@ -1467,10 +1480,12 @@
                 document.getElementById('register-last-name').value = '';
                 document.getElementById('register-email').value = '';
                 document.getElementById('register-password').value = '';
+                document.getElementById('register-api-key').value = '';
                 document.getElementById('main-register-first-name').value = '';
                 document.getElementById('main-register-last-name').value = '';
                 document.getElementById('main-register-email').value = '';
                 document.getElementById('main-register-password').value = '';
+                document.getElementById('main-register-api-key').value = '';
 
                 // Switch to profiles tab after successful registration
                 switchTab('profile-section');

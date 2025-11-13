@@ -3,8 +3,11 @@ from datetime import datetime
 from apiflask import APIBlueprint, abort
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
+from news_grouper.api import db
+from news_grouper.api.auth.models import User
 from news_grouper.api.common.models import Post, PostGroup
 from news_grouper.api.news_grouping.news_groupers import NewsGrouper
+from news_grouper.api.news_grouping.news_groupers.gemini import GeminiClient
 from news_grouper.api.news_grouping.schemas import (
     GrouperOutSchema,
     NewsInSchema,
@@ -32,6 +35,8 @@ def get_groupers():
 def get_news(profile_id, query_data):
     """Get news with the chosen grouper"""
     user_id = get_jwt_identity()
+    user = db.session.get(User, int(user_id))
+
     profile = Profile.query.filter_by(id=profile_id, user_id=user_id).first_or_404()
     if not profile.news_sources:
         abort(400, message="No news sources configured for current profile")
@@ -50,8 +55,10 @@ def get_news(profile_id, query_data):
     if not all_posts:
         abort(400, message="No posts found from any source")
 
+    gemini_client = GeminiClient(api_key=user.api_key)
+
     grouper = NewsGrouper.get_grouper_by_name(query_data["grouper"])
-    grouped_results = grouper.group_posts(all_posts)
+    grouped_results = grouper.group_posts(all_posts, gemini_client)
     individual_posts = []
     groups = []
     for item in grouped_results:

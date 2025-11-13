@@ -3,7 +3,6 @@ from collections.abc import Iterable
 
 from news_grouper.api.common.models import Post, PostGroup
 from news_grouper.api.common.subclass_registrar import SubclassRegistrar
-from news_grouper.api.config import GOOGLE_API_KEY
 from news_grouper.api.news_grouping.news_groupers.gemini import GeminiClient
 
 
@@ -12,40 +11,46 @@ class NewsGrouper(SubclassRegistrar, ABC):
 
     name: str
     description: str
-    gemini_client: GeminiClient = GeminiClient(api_key=GOOGLE_API_KEY)
 
     @classmethod
-    def group_posts(cls, posts: list[Post]) -> list[Post | PostGroup]:
+    def group_posts(
+        cls, posts: list[Post], gemini_client: GeminiClient
+    ) -> list[Post | PostGroup]:
         """Group posts based on some criteria.
 
         :param posts: The list of posts to group.
+        :param gemini_client: The Gemini client to use for API calls.
         :return: A list of grouped posts.
         """
-        groups = cls._get_groups(posts)
+        groups = cls._get_groups(posts, gemini_client)
         result = []
         for group_posts in groups:
             if len(group_posts) == 1:
                 result.append(group_posts[0])
             else:
-                summary = cls.summarize_posts(group_posts)
+                summary = cls.summarize_posts(group_posts, gemini_client)
                 result.append(PostGroup(posts=group_posts, summary=summary))
         return result
 
     @classmethod
-    def summarize_posts(cls, posts: list[Post]) -> str:
+    def summarize_posts(cls, posts: list[Post], gemini_client: GeminiClient) -> str:
         """Summarize a list of posts. The default implementation uses Gemini API.
 
         :param posts: The list of posts to summarize.
+        :param gemini_client: The Gemini client to use for API calls.
         :return: The summary of the posts.
         """
-        return NewsGrouper.gemini_client.summarize_posts(posts)
+        return gemini_client.summarize_posts(posts)
 
     @classmethod
     @abstractmethod
-    def _get_groups(cls, posts: list[Post]) -> Iterable[list[Post]]:
+    def _get_groups(
+        cls, posts: list[Post], gemini_client: GeminiClient
+    ) -> Iterable[list[Post]]:
         """Abstract method to get groups of posts.
 
         :param posts: The list of posts to group.
+        :param gemini_client: The Gemini client to use for API calls.
         :return: A list of groups, where each group is a list of posts.
         """
         ...

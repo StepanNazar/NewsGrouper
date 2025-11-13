@@ -45,7 +45,14 @@ def register(json_data):
         current_user = User.find_by_email(json_data["email"])
         if current_user:
             abort(409, message="Email already used")
-        new_user = User(**json_data)
+        user_data = {
+            "first_name": json_data["first_name"],
+            "last_name": json_data["last_name"],
+            "email": json_data["email"],
+            "password": json_data["password"],
+            "api_key": json_data["gemini_api_key"],
+        }
+        new_user = User(**user_data)
     except ValueError as e:
         abort(400, message=str(e))
     db.session.add(new_user)

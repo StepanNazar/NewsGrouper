@@ -26,6 +26,7 @@ class LoginSchema(PasswordSchema):
 class RegisterSchema(LoginSchema):
     first_name = String(required=True)
     last_name = String(required=True)
+    gemini_api_key = String(required=True, validate=validators.Length(min=1))
 
 
 class WhoAmISchema(TimestampSchema, Schema):

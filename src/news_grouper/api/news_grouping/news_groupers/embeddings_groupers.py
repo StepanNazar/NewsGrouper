@@ -9,20 +9,24 @@ from sklearn.metrics.pairwise import cosine_distances
 
 from news_grouper.api.common.models import Post
 from news_grouper.api.news_grouping.news_groupers.abstract_grouper import NewsGrouper
+from news_grouper.api.news_grouping.news_groupers.gemini import GeminiClient
 
 
 class EmbeddingsGrouper(NewsGrouper):
     """Abstract base class for groupers that use embeddings."""
 
     @classmethod
-    def _get_groups(cls, posts: list[Post]) -> Iterable[list[Post]]:
+    def _get_groups(
+        cls, posts: list[Post], gemini_client: GeminiClient
+    ) -> Iterable[list[Post]]:
         """Group posts based on their embeddings.
 
         :param posts: The list of posts to group.
+        :param gemini_client: The Gemini client to use for API calls.
         :return: A list of groups, where each group is a list of posts.
         """
         embeddings, posts_with_failed_embeddings, posts_with_successful_embeddings = (
-            cls._computes_embeddings(posts)
+            cls._computes_embeddings(posts, gemini_client)
         )
         labels = cls._cluster_embeddings(np.stack(embeddings))
         groups = cls._labels_to_groups(labels, posts_with_successful_embeddings)
@@ -32,10 +36,11 @@ class EmbeddingsGrouper(NewsGrouper):
 
     @classmethod
     def _computes_embeddings(
-        cls, posts: list[Post]
+        cls, posts: list[Post], gemini_client: GeminiClient
     ) -> tuple[list[list[float]], list[Post], list[Post]]:
         """Compute embeddings for a list of posts.
         :param posts: The list of posts to compute embeddings for.
+        :param gemini_client: The Gemini client to use for API calls.
         :return: A tuple containing:
             - A list of embeddings (list of floats).
             - A list of posts for which embedding computation failed.
@@ -45,7 +50,7 @@ class EmbeddingsGrouper(NewsGrouper):
         posts_with_failed_embeddings = []
         posts_with_successful_embeddings = []
         for post in posts:
-            embedding = NewsGrouper.gemini_client.compute_embedding(post)
+            embedding = gemini_client.compute_embedding(post)
             if embedding is not None:
                 embeddings.append(embedding)
                 posts_with_successful_embeddings.append(post)

@@ -15,6 +15,7 @@ class User(TimestampMixin, db.Model):
     last_name: so.Mapped[str] = so.mapped_column(sa.String(64))
     email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True, unique=True)
     password_hash: so.Mapped[str] = so.mapped_column(sa.String(256))
+    api_key: so.Mapped[str] = so.mapped_column(sa.String(256))
     profiles: so.Mapped[list[Profile]] = so.relationship(
         foreign_keys=[Profile.user_id], back_populates="user"
     )

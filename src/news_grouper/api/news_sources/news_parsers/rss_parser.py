@@ -84,7 +84,9 @@ class RSSFeedParser(NewsParser):
     def check_source_link(cls, link: str) -> bool:
         """Check if the source link is valid."""
         try:
-            response = requests.get(link, timeout=10)
+            response = requests.get(
+                link, timeout=10, headers={"User-Agent": "News Grouper"}
+            )
             return response.status_code == 200
         except requests.RequestException:
             return False
