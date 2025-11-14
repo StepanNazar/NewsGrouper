@@ -30,7 +30,7 @@ def upgrade():
 
     # Optionally generate API keys for existing users here
     user_table = sa.Table('user', sa.MetaData(), autoload_with=op.get_bind())
-    op.execute(user_table.update().where(user_table.c.api_key.is_(None)).values(api_key=os.getenv("GOOGLE_API_KEY")))
+    op.execute(user_table.update().where(user_table.c.api_key.is_(None)).values(api_key=os.environ.get("GOOGLE_API_KEY")))
 
     # Make the column non-nullable after populating it
     with op.batch_alter_table('user', schema=None) as batch_op:
