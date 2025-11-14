@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
