@@ -1,0 +1,2 @@
+pywebview[qt]==6.1
+pyshortcuts==1.9.5

@@ -14,7 +14,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = (
         os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS") or False
     )
-    JWT_COOKIE_SECURE = False
     JWT_COOKIE_SAMESITE = "Strict"
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(
         minutes=float(os.environ.get("JWT_ACCESS_TOKEN_EXPIRES_MINUTES") or 15)
@@ -42,4 +41,8 @@ class TestConfig(Config):
 
 
 class ProdConfig(Config):
-    pass
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    SECRET_KEY = os.environ["SECRET_KEY"]
+    JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]
+    DEBUG = False
+    JWT_COOKIE_CSRF_PROTECT = True
