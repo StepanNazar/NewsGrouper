@@ -28,7 +28,7 @@ GEMINI_SUMMARY_PROMPT_TEMPLATE = (
     "\nInput:"
     "\n{}"
 )
-SUMMARY_MODEL = "gemini-2.5-flash-lite-preview-06-17"
+SUMMARY_MODEL = "gemma-4-31b-it"
 TOP_P = 0.5
 TEMPERATURE = 0.5
 THINKING_BUDGET = 0
