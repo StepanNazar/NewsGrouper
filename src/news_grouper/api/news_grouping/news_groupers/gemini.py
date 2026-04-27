@@ -31,7 +31,7 @@ GEMINI_SUMMARY_PROMPT_TEMPLATE = (
 SUMMARY_MODEL = "gemma-4-31b-it"
 TOP_P = 0.5
 TEMPERATURE = 0.5
-THINKING_BUDGET = 0
+THINKING_BUDGET = None
 
 EMBEDDING_MODEL = "gemini-embedding-001"
 EMBEDDING_TASK_TYPE = "SEMANTIC_SIMILARITY"
@@ -102,7 +102,7 @@ class GeminiClient:
             model=SUMMARY_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=THINKING_BUDGET),
+                thinking_config=types.ThinkingConfig(thinking_budget=THINKING_BUDGET) if THINKING_BUDGET is not None else None,
                 temperature=TEMPERATURE,
                 top_p=TOP_P,
             ),
