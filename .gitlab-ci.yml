@@ -17,6 +17,7 @@ default:
   interruptible: true
   image:
     name: ghcr.io/astral-sh/ruff
+    entrypoint: [""]
   before_script:
     - cd $CI_PROJECT_DIR
     - ruff --version
