@@ -49,7 +49,15 @@ def client(app, db):
 
 
 class AuthenticatedClient:
-    def __init__(self, client, first_name, last_name, email, password):
+    def __init__(
+        self,
+        client,
+        first_name,
+        last_name,
+        email,
+        password,
+        gemini_api_key="fake-gemini-api-key",
+    ):
         self.client = client
         response = client.post(
             "/api/register",
@@ -58,6 +66,7 @@ class AuthenticatedClient:
                 "last_name": last_name,
                 "email": email,
                 "password": password,
+                "gemini_api_key": gemini_api_key,
             },
         )
         self.access_token = response.json["access_token"]

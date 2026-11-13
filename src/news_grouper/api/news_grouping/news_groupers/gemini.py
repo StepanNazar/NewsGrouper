@@ -102,7 +102,9 @@ class GeminiClient:
             model=SUMMARY_MODEL,
             contents=prompt,
             config=types.GenerateContentConfig(
-                thinking_config=types.ThinkingConfig(thinking_budget=THINKING_BUDGET) if THINKING_BUDGET is not None else None,
+                thinking_config=types.ThinkingConfig(thinking_budget=THINKING_BUDGET)
+                if THINKING_BUDGET is not None
+                else None,
                 temperature=TEMPERATURE,
                 top_p=TOP_P,
             ),

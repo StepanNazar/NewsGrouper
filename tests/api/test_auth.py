@@ -182,6 +182,7 @@ def register_user(
     last_name="User",
     email="john.doe@example.com",
     password="SecurePassw0rd!",  # noqa: S107
+    gemini_api_key="fake-gemini-api-key",
 ):
     return client.post(
         "/api/register",
@@ -190,6 +191,7 @@ def register_user(
             "last_name": last_name,
             "email": email,
             "password": password,
+            "gemini_api_key": gemini_api_key,
         },
     )
 

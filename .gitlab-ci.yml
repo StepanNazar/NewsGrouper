@@ -1,0 +1,108 @@
+stages:
+- lint
+- test
+- build
+
+default:
+  image: python:3.12-slim
+
+.standard-rules:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+.base_ruff:
+  extends: .standard-rules
+  stage: lint
+  interruptible: true
+  image:
+    name: ghcr.io/astral-sh/ruff
+  before_script:
+    - cd $CI_PROJECT_DIR
+    - ruff --version
+
+Ruff Check:
+  extends: .base_ruff
+  script:
+    - ruff check --output-format=gitlab --output-file=code-quality-report.json
+  artifacts:
+    when: always
+    paths:
+      - code-quality-report.json
+    reports:
+      codequality: $CI_PROJECT_DIR/code-quality-report.json
+
+Ruff Format:
+  extends: .base_ruff
+  script:
+    - ruff format --check --diff
+
+Pyright Check:
+  extends: .standard-rules
+  stage: lint
+  interruptible: true
+  image: node
+  before_script:
+    - npm i -g pyright
+    - npm i -g pyright-to-gitlab-ci
+  script:
+    - pyright --outputjson > report_raw.json
+  after_script:
+    - pyright-to-gitlab-ci --src report_raw.json --output report.json --base_path .
+  artifacts:
+    when: always
+    paths:
+      - report.json
+    reports:
+      codequality: report.json
+
+sast:
+  stage: lint
+  interruptible: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+include:
+- template: Security/SAST.gitlab-ci.yml
+- template: Security/Secret-Detection.gitlab-ci.yml
+secret_detection:
+  stage: lint
+  interruptible: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+Pytest:
+  extends: .standard-rules
+  stage: test
+  interruptible: true
+  before_script:
+    - pip install -r requirements.txt
+    - pip install -r dev-requirements.txt
+  script:
+    - pytest -v --cov=src/news_grouper --cov-report=xml --junitxml=report.xml --cov-fail-under=50
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+(?:\.\d+)?)%$/'
+  artifacts:
+    when: always
+    paths:
+      - coverage.xml
+      - report.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: report.xml
+
+build-job:
+  stage: build
+  interruptible: true
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:latest" .
+    - docker push "$CI_REGISTRY_IMAGE:latest"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

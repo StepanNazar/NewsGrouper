@@ -3,13 +3,12 @@ from conftest import (
     assert_response_matches_resource,
     create_profile,
     create_source,
+    lf,
     profile_data,
     source_data,
     updated_profile_data,
     updated_source_data,
 )
-
-from tests.api.conftest import lf
 
 
 @pytest.fixture
