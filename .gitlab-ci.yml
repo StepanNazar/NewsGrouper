@@ -16,13 +16,13 @@ default:
   stage: lint
   interruptible: true
   before_script:
-    - pip install -c requirements.txt ruff
+    - pip install -c dev-requirements.txt ruff
     - ruff --version
 
 Ruff Check:
   extends: .base_ruff
   script:
-    - ruff check --output-format=gitlab --output-file=code-quality-report.json
+    - ruff check --output-format=gitlab | tee code-quality-report.json
   artifacts:
     when: always
     paths:
@@ -40,7 +40,8 @@ Pyright Check:
   stage: lint
   interruptible: true
   before_script:
-    - pip install -c requirements.txt pyright
+    - pip install -c dev-requirements.txt pyright
+    - apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
     - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.41.0/install.sh | bash
     - \. "$HOME/.nvm/nvm.sh"
     - nvm install 26
@@ -48,9 +49,9 @@ Pyright Check:
     - npm -v
     - npm i -g pyright-to-gitlab-ci
   script:
-    - pyright --outputjson > report_raw.json
-  after_script:
+    - pyright --outputjson | tee report_raw.json || PYRIGHT_EXIT_CODE=$?
     - pyright-to-gitlab-ci --src report_raw.json --output report.json --base_path .
+    - exit "${PYRIGHT_EXIT_CODE:-0}"
   artifacts:
     when: always
     paths:
@@ -58,7 +59,7 @@ Pyright Check:
     reports:
       codequality: report.json
 
-sast:
+semgrep-sast:
   stage: lint
   interruptible: true
   rules:
