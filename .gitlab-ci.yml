@@ -41,7 +41,7 @@ Pyright Check:
   interruptible: true
   before_script:
     - pip install -c dev-requirements.txt pyright
-    - apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+    - apt-get update && apt-get install -y --no-install-recommends curl ca-certificates libatomic1
     - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.41.0/install.sh | bash
     - \. "$HOME/.nvm/nvm.sh"
     - nvm install 26
