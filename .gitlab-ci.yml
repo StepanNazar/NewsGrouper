@@ -16,7 +16,7 @@ default:
   stage: lint
   interruptible: true
   image:
-    name: ghcr.io/astral-sh/ruff:0.17.5-alpine
+    name: ghcr.io/astral-sh/ruff:0.12.2-alpine
   before_script:
     - cd $CI_PROJECT_DIR
     - ruff --version
